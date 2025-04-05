@@ -1,4 +1,4 @@
-package com.robotbot.avito.finance_tracker_client
+package com.robotbot.finance_tracker_client
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge

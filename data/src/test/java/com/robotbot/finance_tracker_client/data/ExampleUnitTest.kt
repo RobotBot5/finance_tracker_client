@@ -1,4 +1,4 @@
-package com.robotbot.avito.finance_tracker_client
+package com.robotbot.finance_tracker_client.data
 
 import org.junit.Test
 

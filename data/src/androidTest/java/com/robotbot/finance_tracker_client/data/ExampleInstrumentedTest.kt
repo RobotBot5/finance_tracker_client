@@ -1,4 +1,4 @@
-package com.robotbot.avito.finance_tracker_client
+package com.robotbot.finance_tracker_client.data
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.robotbot.avito.finance_tracker_client", appContext.packageName)
+        assertEquals("com.robotbot.finance_tracker_client.data.test", appContext.packageName)
     }
 }

@@ -21,4 +21,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "Finance Tracker Client"
 include(":app")
- 
+include(":data")
+include(":core:common")
