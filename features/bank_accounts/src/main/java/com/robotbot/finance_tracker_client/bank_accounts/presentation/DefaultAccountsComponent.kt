@@ -1,0 +1,48 @@
+package com.robotbot.finance_tracker_client.bank_accounts.presentation
+
+import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.essenty.lifecycle.doOnStart
+import com.arkivanov.mvikotlin.core.instancekeeper.getStore
+import com.arkivanov.mvikotlin.extensions.coroutines.labels
+import com.arkivanov.mvikotlin.extensions.coroutines.stateFlow
+import com.robotbot.finance_tracker_client.dependencies.util.componentScope
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+
+internal class DefaultAccountsComponent @AssistedInject constructor(
+    private val storeFactory: AccountsStoreFactory,
+    @Assisted("onAuthFailed") private val onAuthFailed: () -> Unit,
+    @Assisted componentContext: ComponentContext
+) : AccountsComponent, ComponentContext by componentContext {
+
+    private val store = instanceKeeper.getStore { storeFactory.create() }
+    private val scope = componentScope()
+
+    init {
+        scope.launch {
+            store.labels.collect {
+                when (it) {
+                    AccountsStore.Label.AuthFailed -> onAuthFailed()
+                }
+            }
+        }
+        doOnStart {
+            store.accept(AccountsStore.Intent.ReloadAccounts)
+        }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override val model: StateFlow<AccountsStore.State> = store.stateFlow
+
+    @AssistedFactory
+    interface Factory : AccountsComponent.Factory {
+        override fun invoke(
+            @Assisted("onAuthFailed") onAuthFailed: () -> Unit,
+            componentContext: ComponentContext
+        ): DefaultAccountsComponent
+    }
+}

@@ -12,6 +12,10 @@ open class BackendException(
     message: String
 ) : AppException(message = message)
 
+class AuthException(
+    message: String
+) : BackendException(code = 401, message = message)
+
 class ParseBackendResponseException(
     cause: Throwable
 ) : AppException(cause = cause)
