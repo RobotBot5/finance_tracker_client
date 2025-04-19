@@ -8,8 +8,8 @@ import retrofit2.Retrofit
 @Module(includes = [PrefsModule::class])
 internal object RetrofitModule {
 
-        @Provides
-        fun provideRetrofit(apiFactory: ApiFactory): Retrofit {
-            return apiFactory.retrofit
-        }
+    @Provides
+    fun provideRetrofit(apiFactory: ApiFactory): Retrofit {
+        return apiFactory.retrofit
+    }
 }

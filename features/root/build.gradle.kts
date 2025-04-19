@@ -57,4 +57,5 @@ dependencies {
 
     implementation(project(":features:authorize"))
     implementation(project(":features:bank_accounts"))
+    implementation(project(":core:ui"))
 }

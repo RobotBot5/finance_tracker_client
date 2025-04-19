@@ -1,6 +1,7 @@
 package com.robotbot.finance_tracker_client.remote
 
 import com.robotbot.finance_tracker_client.remote.token.AuthInterceptor
+import com.robotbot.finance_tracker_client.remote.util.BASE_URL
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -10,10 +11,6 @@ import javax.inject.Inject
 internal class ApiFactory @Inject constructor(
     authInterceptor: AuthInterceptor
 ) {
-
-    companion object {
-        private const val BASE_URL = "http://10.0.2.2:8080/"
-    }
 
     private val okHttpClient = OkHttpClient.Builder()
         .addInterceptor(authInterceptor)

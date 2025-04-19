@@ -66,4 +66,10 @@ dependencies {
     implementation(project(":data:bank_accounts"))
     implementation(project(":core:dependencies"))
     implementation(project(":core:common"))
+    implementation(project(":core:ui"))
+    implementation(project(":core:remote"))
+
+    implementation("io.coil-kt.coil3:coil-compose:3.1.0")
+    implementation("io.coil-kt.coil3:coil-svg:3.1.0")
+    implementation("io.coil-kt.coil3:coil-network-okhttp:3.1.0")
 }

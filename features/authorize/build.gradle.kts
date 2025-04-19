@@ -60,6 +60,8 @@ dependencies {
     implementation(libs.dagger2)
     ksp(libs.dagger2.compiler)
 
+    implementation(project(":core:ui"))
+
     implementation(project(":data:authorize"))
     implementation(project(":core:dependencies"))
 

@@ -1,12 +1,12 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.ksp)
+    alias(libs.plugins.kotlin.compose)
 }
 
 android {
-    namespace = "com.robotbot.finance_tracker_client.remote"
-    compileSdk = 34
+    namespace = "com.robotbot.finance_tracker_client.ui"
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 24
@@ -31,26 +31,19 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+    buildFeatures {
+        compose = true
+    }
 }
 
 dependencies {
 
     implementation(libs.androidx.core.ktx)
-
-    implementation(libs.androidx.security.crypto)
-    implementation(libs.androidx.security.crypto.ktx)
-
-    implementation(libs.dagger2)
-    ksp(libs.dagger2.compiler)
-
-    implementation(libs.retrofit.core)
-    implementation(libs.retrofit.converter.gson)
-    implementation(libs.okhttp)
-    implementation(libs.okhttp.loggingInterceptor)
-
-    implementation(project(":core:common"))
+    implementation(libs.androidx.activity.compose)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.ui.graphics)
+    implementation(libs.androidx.material3)
 
     implementation(libs.coil.compose)
-    implementation(libs.coil.svg)
-    implementation(libs.coil.network.okhttp)
 }

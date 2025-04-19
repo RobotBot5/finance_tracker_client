@@ -75,4 +75,7 @@ dependencies {
     
     implementation(project(":core:dependencies"))
     implementation(project(":core:remote"))
+    implementation(project(":core:ui"))
+
+    implementation(libs.coil.compose)
 }

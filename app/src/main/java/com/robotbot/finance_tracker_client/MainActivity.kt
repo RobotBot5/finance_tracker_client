@@ -8,10 +8,12 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.defaultComponentContext
 import com.robotbot.finance_tracker_client.di.DaggerAppDaggerComponent
 import com.robotbot.finance_tracker_client.root.RootContent
+import com.robotbot.finance_tracker_client.ui.coil.LocalCoilImageLoader
 
 class MainActivity : ComponentActivity() {
 
@@ -20,13 +22,17 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge(statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT))
 
-        val component = DaggerAppDaggerComponent.factory()
+        val daggerComponent = DaggerAppDaggerComponent.factory()
             .create(application = application)
+
+        val component = daggerComponent
             .rootComponentFactory(defaultComponentContext())
 
         setContent {
-            MaterialTheme {
-                RootContent(component = component, modifier = Modifier.fillMaxSize())
+            CompositionLocalProvider(LocalCoilImageLoader provides daggerComponent.imageLoader) {
+                MaterialTheme {
+                    RootContent(component = component, modifier = Modifier.fillMaxSize())
+                }
             }
         }
     }
