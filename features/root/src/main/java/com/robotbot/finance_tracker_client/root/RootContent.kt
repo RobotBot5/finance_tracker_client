@@ -3,7 +3,15 @@ package com.robotbot.finance_tracker_client.root
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.extensions.compose.stack.Children
 import com.arkivanov.decompose.extensions.compose.stack.animation.fade
@@ -11,6 +19,7 @@ import com.arkivanov.decompose.extensions.compose.stack.animation.plus
 import com.arkivanov.decompose.extensions.compose.stack.animation.scale
 import com.arkivanov.decompose.extensions.compose.stack.animation.slide
 import com.arkivanov.decompose.extensions.compose.stack.animation.stackAnimation
+import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import com.robotbot.finance_tracker_client.authorize.ui.AuthorizeContent
 import com.robotbot.finance_tracker_client.bank_accounts.ui.AccountsContent
 import com.robotbot.finance_tracker_client.categories.ui.CategoriesContent
@@ -30,24 +39,51 @@ import com.robotbot.finance_tracker_client.ui.theme.FinanceTrackerTheme
 @Composable
 fun RootContent(component: RootComponent, modifier: Modifier = Modifier) {
     FinanceTrackerTheme {
-        Children(
-            stack = component.stack,
-            modifier = modifier,
-            animation = stackAnimation { child ->
-                when (child.instance) {
-                    is Accounts, is ManageAccounts, is CurrencyChoose, is ChooseIcon, is Categories, is ManageCategories -> fade() + scale()
-                    is Authorize -> slide(orientation = Orientation.Vertical, animationSpec = tween(600))
+
+        val childStack by component.stack.subscribeAsState()
+        val activeInstance = childStack.active.instance
+        val tabs = MainNavTab.tabs
+        val activeTab: MainNavTab? = remember(activeInstance) {
+            when (activeInstance) {
+                is Accounts -> MainNavTab.Accounts
+                is Categories -> MainNavTab.Categories
+                else -> null
+            }
+        }
+
+        Scaffold(
+            bottomBar = {
+                NavigationBar {
+                    tabs.forEach { tab ->
+                        NavigationBarItem(
+                            selected = activeTab == tab,
+                            onClick = { component.onTabClicked(tab) },
+                            icon = { Icon(imageVector = tab.icon, contentDescription = null) },
+                            label = { Text(text = tab.title) }
+                        )
+                    }
                 }
             }
-        ) {
-            when (val child = it.instance) {
-                is Authorize -> AuthorizeContent(component = child.component, modifier = Modifier.fillMaxWidth())
-                is Accounts -> AccountsContent(component = child.component, modifier = Modifier.fillMaxWidth())
-                is ManageAccounts -> ManageAccountsContent(component = child.component, modifier = Modifier.fillMaxWidth())
-                is CurrencyChoose -> ChooseCurrencyContent(component = child.component, modifier = Modifier.fillMaxWidth())
-                is ChooseIcon -> ChooseIconContent(component = child.component, modifier = Modifier.fillMaxWidth())
-                is Categories -> CategoriesContent(component = child.component, modifier = Modifier.fillMaxWidth())
-                is ManageCategories -> ManageCategoriesContent(component = child.component, modifier = Modifier.fillMaxWidth())
+        ) { paddings ->
+            Children(
+                stack = component.stack,
+                modifier = modifier,
+                animation = stackAnimation { child ->
+                    when (child.instance) {
+                        is Accounts, is ManageAccounts, is CurrencyChoose, is ChooseIcon, is Categories, is ManageCategories -> fade() + scale()
+                        is Authorize -> slide(orientation = Orientation.Vertical, animationSpec = tween(600))
+                    }
+                }
+            ) {
+                when (val child = it.instance) {
+                    is Authorize -> AuthorizeContent(component = child.component, modifier = Modifier.fillMaxWidth())
+                    is Accounts -> AccountsContent(component = child.component, modifier = Modifier.fillMaxWidth().padding(paddings))
+                    is ManageAccounts -> ManageAccountsContent(component = child.component, modifier = Modifier.fillMaxWidth().padding(paddings))
+                    is CurrencyChoose -> ChooseCurrencyContent(component = child.component, modifier = Modifier.fillMaxWidth().padding(paddings))
+                    is ChooseIcon -> ChooseIconContent(component = child.component, modifier = Modifier.fillMaxWidth().padding(paddings))
+                    is Categories -> CategoriesContent(component = child.component, modifier = Modifier.fillMaxWidth().padding(paddings))
+                    is ManageCategories -> ManageCategoriesContent(component = child.component, modifier = Modifier.fillMaxWidth().padding(paddings))
+                }
             }
         }
     }

@@ -5,8 +5,10 @@ import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.active
 import com.arkivanov.decompose.router.stack.childStack
+import com.arkivanov.decompose.router.stack.navigate
 import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.pushNew
+import com.arkivanov.decompose.router.stack.replaceAll
 import com.arkivanov.decompose.value.Value
 import com.robotbot.finance_tracker_client.authorize.presentation.AuthorizeComponent
 import com.robotbot.finance_tracker_client.bank_accounts.presentation.AccountsComponent
@@ -47,6 +49,13 @@ internal class DefaultRootComponent @AssistedInject constructor(
             handleBackButton = true,
             childFactory = ::child
         )
+
+    override fun onTabClicked(tab: MainNavTab) {
+        when (tab) {
+            MainNavTab.Accounts -> navigation.replaceAll(Config.Accounts)
+            MainNavTab.Categories -> navigation.replaceAll(Config.Categories)
+        }
+    }
 
     private fun child(config: Config, childComponentContext: ComponentContext): Child =
         when (config) {

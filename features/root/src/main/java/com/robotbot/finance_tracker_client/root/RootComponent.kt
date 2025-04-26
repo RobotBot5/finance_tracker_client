@@ -15,6 +15,8 @@ interface RootComponent {
 
     val stack: Value<ChildStack<*, Child>>
 
+    fun onTabClicked(tab: MainNavTab)
+
     sealed interface Child {
 
         data class Authorize(val component: AuthorizeComponent) : Child
