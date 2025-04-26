@@ -68,11 +68,15 @@ dependencies {
 
     implementation(project(":data:authorize"))
     implementation(project(":data:bank_accounts"))
+    implementation(project(":data:get_info"))
 
     implementation(project(":features:authorize"))
     implementation(project(":features:root"))
     implementation(project(":features:bank_accounts"))
-    
+    implementation(project(":features:manage_accounts"))
+    implementation(project(":features:currency_choose"))
+    implementation(project(":features:icon_choose"))
+
     implementation(project(":core:dependencies"))
     implementation(project(":core:remote"))
     implementation(project(":core:ui"))

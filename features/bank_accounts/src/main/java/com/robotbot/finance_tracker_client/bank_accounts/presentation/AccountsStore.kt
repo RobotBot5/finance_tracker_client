@@ -21,6 +21,10 @@ interface AccountsStore : Store<Intent, State, Label> {
     sealed interface Intent {
 
         data object ReloadAccounts : Intent
+
+        data object CreateAccountClicked : Intent
+
+        data class OnAccountClicked(val accountId: Long) : Intent
     }
 
     data class State(val accountsState: AccountsState) {
@@ -39,6 +43,10 @@ interface AccountsStore : Store<Intent, State, Label> {
     sealed interface Label {
 
         data object AuthFailed : Label
+
+        data object CreateAccountNavigate : Label
+
+        data class EditAccount(val accountId: Long) : Label
     }
 }
 
@@ -122,6 +130,12 @@ internal class AccountsStoreFactory @Inject constructor(
                             dispatch(Msg.AccountsError)
                         }
                     }
+                }
+                Intent.CreateAccountClicked -> {
+                    publish(Label.CreateAccountNavigate)
+                }
+                is Intent.OnAccountClicked -> {
+                    publish(Label.EditAccount(intent.accountId))
                 }
             }
         }

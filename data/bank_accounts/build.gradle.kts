@@ -42,6 +42,7 @@ dependencies {
     implementation(libs.dagger2)
     ksp(libs.dagger2.compiler)
 
+    implementation(project(":data:get_info"))
     implementation(project(":core:remote"))
     implementation(project(":core:common"))
 }

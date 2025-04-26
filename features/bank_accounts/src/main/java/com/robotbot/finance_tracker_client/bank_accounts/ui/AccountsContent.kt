@@ -1,6 +1,7 @@
 package com.robotbot.finance_tracker_client.bank_accounts.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,21 +19,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil3.ImageLoader
 import coil3.compose.AsyncImage
-import coil3.network.okhttp.OkHttpNetworkFetcherFactory
-import coil3.svg.SvgDecoder
 import com.robotbot.finance_tracker_client.bank_accounts.entities.AccountEntity
-import com.robotbot.finance_tracker_client.bank_accounts.entities.CurrencyEntity
-import com.robotbot.finance_tracker_client.bank_accounts.entities.IconEntity
 import com.robotbot.finance_tracker_client.bank_accounts.presentation.AccountsComponent
 import com.robotbot.finance_tracker_client.bank_accounts.presentation.AccountsStore
 import com.robotbot.finance_tracker_client.remote.util.BASE_URL
@@ -55,9 +49,17 @@ fun AccountsContent(component: AccountsComponent, modifier: Modifier = Modifier)
                     items = accountsState.accounts,
                     key = { it.id }
                 ) {
-                    AccountItem(it)
+                    AccountItem(it, component::onAccountClicked)
+                }
+                item {
+                    Button(
+                        onClick = component::onCreateAccountClicked
+                    ) {
+                        Text(text = "Add Account")
+                    }
                 }
             }
+
         }
         AccountsStore.State.AccountsState.Error -> {
             Text(text = "Error")
@@ -69,7 +71,7 @@ fun AccountsContent(component: AccountsComponent, modifier: Modifier = Modifier)
 }
 
 @Composable
-private fun AccountItem(account: AccountEntity, modifier: Modifier = Modifier) {
+private fun AccountItem(account: AccountEntity, onAccountClicked: (Long) -> Unit, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -92,6 +94,7 @@ private fun AccountItem(account: AccountEntity, modifier: Modifier = Modifier) {
         Column(
             modifier = Modifier
                 .padding(start = 8.dp)
+                .clickable { onAccountClicked(account.id) }
         ) {
             Text(
                 text = account.name,
@@ -112,18 +115,18 @@ private fun AccountItem(account: AccountEntity, modifier: Modifier = Modifier) {
     }
 }
 
-@Preview
-@Composable
-private fun AccountItemPreview() {
-    FinanceTrackerTheme {
-        Surface {
-            AccountItem(account = AccountEntity(
-                1,
-                "Account 1",
-                CurrencyEntity(code = "USD", symbol = "$", name = "dollars"),
-                BigDecimal.valueOf(2000),
-                IconEntity(name = "Wallet", "wallet")
-            ))
-        }
-    }
-}
+//@Preview
+//@Composable
+//private fun AccountItemPreview() {
+//    FinanceTrackerTheme {
+//        Surface {
+//            AccountItem(account = AccountEntity(
+//                1,
+//                "Account 1",
+//                CurrencyEntity(code = "USD", symbol = "$", name = "dollars"),
+//                BigDecimal.valueOf(2000),
+//                IconE(name = "Wallet", "wallet")
+//            ))
+//        }
+//    }
+//}

@@ -7,9 +7,15 @@ interface AccountsComponent {
 
     val model: StateFlow<AccountsStore.State>
 
+    fun onCreateAccountClicked()
+
+    fun onAccountClicked(accountId: Long)
+
     fun interface Factory {
         operator fun invoke(
             onAuthFailed: () -> Unit,
+            onCreateAccount: () -> Unit,
+            onEditAccount: (Long) -> Unit,
             componentContext: ComponentContext
         ): AccountsComponent
     }
