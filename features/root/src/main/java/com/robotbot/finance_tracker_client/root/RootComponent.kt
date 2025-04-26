@@ -5,6 +5,7 @@ import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.value.Value
 import com.robotbot.finance_tracker_client.authorize.presentation.AuthorizeComponent
 import com.robotbot.finance_tracker_client.bank_accounts.presentation.AccountsComponent
+import com.robotbot.finance_tracker_client.categories.presentation.CategoriesComponent
 import com.robotbot.finance_tracker_client.currency_choose.presentation.CurrenciesComponent
 import com.robotbot.finance_tracker_client.icon_choose.presentation.ChooseIconComponent
 import com.robotbot.finance_tracker_client.manage_accounts.presentation.ManageAccountsComponent
@@ -24,6 +25,8 @@ interface RootComponent {
         data class CurrencyChoose(val component: CurrenciesComponent) : Child
 
         data class ChooseIcon(val component: ChooseIconComponent) : Child
+
+        data class Categories(val component: CategoriesComponent) : Child
     }
 
     fun interface Factory {

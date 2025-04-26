@@ -10,11 +10,13 @@ import com.arkivanov.decompose.router.stack.pushNew
 import com.arkivanov.decompose.value.Value
 import com.robotbot.finance_tracker_client.authorize.presentation.AuthorizeComponent
 import com.robotbot.finance_tracker_client.bank_accounts.presentation.AccountsComponent
+import com.robotbot.finance_tracker_client.categories.presentation.CategoriesComponent
 import com.robotbot.finance_tracker_client.currency_choose.presentation.CurrenciesComponent
 import com.robotbot.finance_tracker_client.icon_choose.presentation.ChooseIconComponent
 import com.robotbot.finance_tracker_client.manage_accounts.presentation.ManageAccountsComponent
 import com.robotbot.finance_tracker_client.root.RootComponent.Child
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.Accounts
+import com.robotbot.finance_tracker_client.root.RootComponent.Child.Categories
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.CurrencyChoose
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.ManageAccounts
 import dagger.assisted.Assisted
@@ -28,6 +30,7 @@ internal class DefaultRootComponent @AssistedInject constructor(
     private val manageAccountsComponentFactory: ManageAccountsComponent.Factory,
     private val currenciesComponentFactory: CurrenciesComponent.Factory,
     private val chooseIconComponentFactory: ChooseIconComponent.Factory,
+    private val categoriesComponentFactory: CategoriesComponent.Factory,
     @Assisted componentContext: ComponentContext
 ) : RootComponent, ComponentContext by componentContext {
 
@@ -37,7 +40,7 @@ internal class DefaultRootComponent @AssistedInject constructor(
         childStack(
             source = navigation,
             serializer = Config.serializer(),
-            initialConfiguration = Config.Accounts,
+            initialConfiguration = Config.Categories,
             handleBackButton = true,
             childFactory = ::child
         )
@@ -64,6 +67,7 @@ internal class DefaultRootComponent @AssistedInject constructor(
                     childComponentContext
                 )
             )
+            Config.Categories -> Categories(categoriesComponent(childComponentContext))
         }
 
     private fun authorizeComponent(componentContext: ComponentContext): AuthorizeComponent =
@@ -124,6 +128,10 @@ internal class DefaultRootComponent @AssistedInject constructor(
             componentContext = componentContext
     )
 
+    private fun categoriesComponent(
+        componentContext: ComponentContext
+    ): CategoriesComponent = categoriesComponentFactory(componentContext)
+
     @Serializable
     private sealed interface Config {
 
@@ -141,6 +149,9 @@ internal class DefaultRootComponent @AssistedInject constructor(
 
         @Serializable
         data class ChooseIcon(val yetSelectedIconId: Long) : Config
+
+        @Serializable
+        data object Categories : Config
     }
 
     @AssistedFactory

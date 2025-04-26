@@ -60,5 +60,6 @@ dependencies {
     implementation(project(":features:manage_accounts"))
     implementation(project(":features:currency_choose"))
     implementation(project(":features:icon_choose"))
+    implementation(project(":features:categories"))
     implementation(project(":core:ui"))
 }

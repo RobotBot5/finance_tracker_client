@@ -1,22 +1,20 @@
 plugins {
-    alias(libs.plugins.android.application)
+    alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.ksp)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.kotlin.compose)
 }
 
 android {
-    namespace = "com.robotbot.finance_tracker_client"
+    namespace = "com.robotbot.finance_tracker_client.categories"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.robotbot.finance_tracker_client"
         minSdk = 24
-        targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
@@ -37,6 +35,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -50,38 +49,26 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
 
+    implementation(libs.mvikotlin.core)
+    implementation(libs.mvikotlin.main)
+    implementation(libs.mvikotlin.logging)
+    implementation(libs.mvikotlin.coroutines)
+
     implementation(libs.decompose.core)
     implementation(libs.decompose.compose)
 
     implementation(libs.dagger2)
     ksp(libs.dagger2.compiler)
 
-    implementation(libs.mvikotlin.core)
-    implementation(libs.mvikotlin.main)
-    implementation(libs.mvikotlin.logging)
-    implementation(libs.mvikotlin.coroutines)
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
 
-    implementation(libs.retrofit.core)
-    implementation(libs.retrofit.converter.gson)
-    implementation(libs.okhttp)
-    implementation(libs.okhttp.loggingInterceptor)
-
-    implementation(project(":data:authorize"))
-    implementation(project(":data:bank_accounts"))
-    implementation(project(":data:get_info"))
     implementation(project(":data:categories"))
-
-    implementation(project(":features:authorize"))
-    implementation(project(":features:root"))
-    implementation(project(":features:bank_accounts"))
-    implementation(project(":features:manage_accounts"))
-    implementation(project(":features:currency_choose"))
-    implementation(project(":features:icon_choose"))
-    implementation(project(":features:categories"))
-
+    implementation(project(":data:get_info"))
     implementation(project(":core:dependencies"))
-    implementation(project(":core:remote"))
+    implementation(project(":core:common"))
     implementation(project(":core:ui"))
+    implementation(project(":core:remote"))
 
     implementation(libs.coil.compose)
 }
