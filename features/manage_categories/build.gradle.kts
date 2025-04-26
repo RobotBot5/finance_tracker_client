@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.robotbot.finance_tracker_client.root"
+    namespace = "com.robotbot.finance_tracker_client.manage_categories"
     compileSdk = 35
 
     defaultConfig {
@@ -33,10 +33,6 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
-    buildFeatures {
-        compose = true
-        buildConfig = true
-    }
 }
 
 dependencies {
@@ -49,18 +45,26 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
 
+    implementation(libs.mvikotlin.core)
+    implementation(libs.mvikotlin.main)
+    implementation(libs.mvikotlin.logging)
+    implementation(libs.mvikotlin.coroutines)
+
     implementation(libs.decompose.core)
     implementation(libs.decompose.compose)
 
     implementation(libs.dagger2)
     ksp(libs.dagger2.compiler)
 
-    implementation(project(":features:authorize"))
-    implementation(project(":features:bank_accounts"))
-    implementation(project(":features:manage_accounts"))
-    implementation(project(":features:currency_choose"))
-    implementation(project(":features:icon_choose"))
-    implementation(project(":features:categories"))
-    implementation(project(":features:manage_categories"))
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
+
+    implementation(project(":data:categories"))
+    implementation(project(":data:get_info"))
+    implementation(project(":core:dependencies"))
+    implementation(project(":core:common"))
     implementation(project(":core:ui"))
+    implementation(project(":core:remote"))
+
+    implementation(libs.coil.compose)
 }

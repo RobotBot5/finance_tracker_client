@@ -17,12 +17,14 @@ import com.robotbot.finance_tracker_client.categories.ui.CategoriesContent
 import com.robotbot.finance_tracker_client.currency_choose.ui.ChooseCurrencyContent
 import com.robotbot.finance_tracker_client.icon_choose.ui.ChooseIconContent
 import com.robotbot.finance_tracker_client.manage_accounts.ui.ManageAccountsContent
+import com.robotbot.finance_tracker_client.manage_categories.ui.ManageCategoriesContent
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.Accounts
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.Authorize
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.Categories
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.ChooseIcon
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.CurrencyChoose
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.ManageAccounts
+import com.robotbot.finance_tracker_client.root.RootComponent.Child.ManageCategories
 import com.robotbot.finance_tracker_client.ui.theme.FinanceTrackerTheme
 
 @Composable
@@ -33,7 +35,7 @@ fun RootContent(component: RootComponent, modifier: Modifier = Modifier) {
             modifier = modifier,
             animation = stackAnimation { child ->
                 when (child.instance) {
-                    is Accounts, is ManageAccounts, is CurrencyChoose, is ChooseIcon, is Categories -> fade() + scale()
+                    is Accounts, is ManageAccounts, is CurrencyChoose, is ChooseIcon, is Categories, is ManageCategories -> fade() + scale()
                     is Authorize -> slide(orientation = Orientation.Vertical, animationSpec = tween(600))
                 }
             }
@@ -45,6 +47,7 @@ fun RootContent(component: RootComponent, modifier: Modifier = Modifier) {
                 is CurrencyChoose -> ChooseCurrencyContent(component = child.component, modifier = Modifier.fillMaxWidth())
                 is ChooseIcon -> ChooseIconContent(component = child.component, modifier = Modifier.fillMaxWidth())
                 is Categories -> CategoriesContent(component = child.component, modifier = Modifier.fillMaxWidth())
+                is ManageCategories -> ManageCategoriesContent(component = child.component, modifier = Modifier.fillMaxWidth())
             }
         }
     }

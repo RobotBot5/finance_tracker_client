@@ -7,8 +7,14 @@ interface CategoriesComponent {
 
     val model: StateFlow<CategoriesStore.State>
 
+    fun onCreateCategoryClicked()
+
+    fun onCategoryClicked(accountId: Long)
+
     fun interface Factory {
         operator fun invoke(
+            onCreateAccount: () -> Unit,
+            onEditAccount: (Long) -> Unit,
             componentContext: ComponentContext
         ): CategoriesComponent
     }

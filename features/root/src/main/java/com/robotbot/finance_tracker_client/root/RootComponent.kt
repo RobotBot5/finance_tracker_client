@@ -9,6 +9,7 @@ import com.robotbot.finance_tracker_client.categories.presentation.CategoriesCom
 import com.robotbot.finance_tracker_client.currency_choose.presentation.CurrenciesComponent
 import com.robotbot.finance_tracker_client.icon_choose.presentation.ChooseIconComponent
 import com.robotbot.finance_tracker_client.manage_accounts.presentation.ManageAccountsComponent
+import com.robotbot.finance_tracker_client.manage_categories.presentation.ManageCategoriesComponent
 
 interface RootComponent {
 
@@ -27,6 +28,8 @@ interface RootComponent {
         data class ChooseIcon(val component: ChooseIconComponent) : Child
 
         data class Categories(val component: CategoriesComponent) : Child
+
+        data class ManageCategories(val component: ManageCategoriesComponent) : Child
     }
 
     fun interface Factory {

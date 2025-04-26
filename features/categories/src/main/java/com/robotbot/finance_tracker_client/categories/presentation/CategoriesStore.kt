@@ -20,6 +20,10 @@ interface CategoriesStore : Store<Intent, State, Label> {
     sealed interface Intent {
 
         data object ReloadCategories : Intent
+
+        data object OnCreateCategoryClicked : Intent
+
+        data class OnCategoryClicked(val categoryId: Long) : Intent
     }
 
     data class State(val categoriesState: CategoriesState) {
@@ -36,6 +40,10 @@ interface CategoriesStore : Store<Intent, State, Label> {
     }
 
     sealed interface Label {
+
+        data object CreateCategoryNavigate : Label
+
+        data class EditCategoryNavigate(val categoryId: Long) : Label
     }
 }
 
@@ -112,6 +120,9 @@ internal class CategoriesStoreFactory @Inject constructor(
                         }
                     }
                 }
+
+                is Intent.OnCategoryClicked -> publish(Label.EditCategoryNavigate(intent.categoryId))
+                Intent.OnCreateCategoryClicked -> publish(Label.CreateCategoryNavigate)
             }
         }
     }

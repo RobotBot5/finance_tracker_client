@@ -14,11 +14,13 @@ import com.robotbot.finance_tracker_client.categories.presentation.CategoriesCom
 import com.robotbot.finance_tracker_client.currency_choose.presentation.CurrenciesComponent
 import com.robotbot.finance_tracker_client.icon_choose.presentation.ChooseIconComponent
 import com.robotbot.finance_tracker_client.manage_accounts.presentation.ManageAccountsComponent
+import com.robotbot.finance_tracker_client.manage_categories.presentation.ManageCategoriesComponent
 import com.robotbot.finance_tracker_client.root.RootComponent.Child
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.Accounts
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.Categories
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.CurrencyChoose
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.ManageAccounts
+import com.robotbot.finance_tracker_client.root.RootComponent.Child.ManageCategories
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -30,6 +32,7 @@ internal class DefaultRootComponent @AssistedInject constructor(
     private val manageAccountsComponentFactory: ManageAccountsComponent.Factory,
     private val currenciesComponentFactory: CurrenciesComponent.Factory,
     private val chooseIconComponentFactory: ChooseIconComponent.Factory,
+    private val manageCategoriesComponentFactory: ManageCategoriesComponent.Factory,
     private val categoriesComponentFactory: CategoriesComponent.Factory,
     @Assisted componentContext: ComponentContext
 ) : RootComponent, ComponentContext by componentContext {
@@ -68,6 +71,12 @@ internal class DefaultRootComponent @AssistedInject constructor(
                 )
             )
             Config.Categories -> Categories(categoriesComponent(childComponentContext))
+            is Config.ManageCategories -> ManageCategories(
+                manageCategoriesComponent(
+                    config.editableCategoryId,
+                    childComponentContext
+                )
+            )
         }
 
     private fun authorizeComponent(componentContext: ComponentContext): AuthorizeComponent =
@@ -123,6 +132,9 @@ internal class DefaultRootComponent @AssistedInject constructor(
                     (stack.active.instance as? ManageAccounts)?.component?.onSelectedIconChanged(
                         newSelectedIconId
                     )
+                    (stack.active.instance as? ManageCategories)?.component?.onSelectedIconChanged(
+                        newSelectedIconId
+                    )
                 }
             },
             componentContext = componentContext
@@ -130,7 +142,22 @@ internal class DefaultRootComponent @AssistedInject constructor(
 
     private fun categoriesComponent(
         componentContext: ComponentContext
-    ): CategoriesComponent = categoriesComponentFactory(componentContext)
+    ): CategoriesComponent = categoriesComponentFactory(
+        onEditAccount = { navigation.pushNew(Config.ManageCategories(it)) },
+        onCreateAccount = { navigation.pushNew(Config.ManageCategories(null)) },
+        componentContext = componentContext
+    )
+
+    private fun manageCategoriesComponent(
+        editableCategoryId: Long?,
+        componentContext: ComponentContext
+    ): ManageCategoriesComponent =
+        manageCategoriesComponentFactory(
+            editableCategoryEntityId = editableCategoryId,
+            onWorkFinished = { navigation.pop() },
+            onChangeIcon = { navigation.pushNew(Config.ChooseIcon(it)) },
+            componentContext = componentContext
+        )
 
     @Serializable
     private sealed interface Config {
@@ -152,6 +179,9 @@ internal class DefaultRootComponent @AssistedInject constructor(
 
         @Serializable
         data object Categories : Config
+
+        @Serializable
+        data class ManageCategories(val editableCategoryId: Long?) : Config
     }
 
     @AssistedFactory

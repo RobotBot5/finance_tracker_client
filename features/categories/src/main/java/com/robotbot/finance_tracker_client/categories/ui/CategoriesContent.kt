@@ -45,7 +45,14 @@ fun CategoriesContent(component: CategoriesComponent, modifier: Modifier = Modif
                     items = categoriesState.categories,
                     key = { it.id }
                 ) {
-                    CategoryItem(category = it)
+                    CategoryItem(category = it, onCategoryClicked = component::onCategoryClicked)
+                }
+                item {
+                    Button(
+                        onClick = component::onCreateCategoryClicked
+                    ) {
+                        Text(text = "Create category")
+                    }
                 }
             }
         }
@@ -59,11 +66,16 @@ fun CategoriesContent(component: CategoriesComponent, modifier: Modifier = Modif
 }
 
 @Composable
-private fun CategoryItem(category: CategoryEntity, modifier: Modifier = Modifier) {
+private fun CategoryItem(
+    category: CategoryEntity,
+    onCategoryClicked: (Long) -> Unit,
+    modifier: Modifier = Modifier
+) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(8.dp),
+            .padding(8.dp)
+            .clickable { onCategoryClicked(category.id) },
         verticalAlignment = Alignment.CenterVertically
     ) {
         val imageLoader = LocalCoilImageLoader.current
