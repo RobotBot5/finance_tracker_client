@@ -62,5 +62,6 @@ dependencies {
     implementation(project(":features:icon_choose"))
     implementation(project(":features:categories"))
     implementation(project(":features:manage_categories"))
+    implementation(project(":features:create_transfer"))
     implementation(project(":core:ui"))
 }

@@ -13,6 +13,9 @@ import com.arkivanov.decompose.value.Value
 import com.robotbot.finance_tracker_client.authorize.presentation.AuthorizeComponent
 import com.robotbot.finance_tracker_client.bank_accounts.presentation.AccountsComponent
 import com.robotbot.finance_tracker_client.categories.presentation.CategoriesComponent
+import com.robotbot.finance_tracker_client.create_transfer.ChangingAccountQualifier
+import com.robotbot.finance_tracker_client.create_transfer.choose_account.presentation.ChooseAccountComponent
+import com.robotbot.finance_tracker_client.create_transfer.main.presentation.CreateTransferComponent
 import com.robotbot.finance_tracker_client.currency_choose.presentation.CurrenciesComponent
 import com.robotbot.finance_tracker_client.icon_choose.presentation.ChooseIconComponent
 import com.robotbot.finance_tracker_client.manage_accounts.presentation.ManageAccountsComponent
@@ -20,6 +23,8 @@ import com.robotbot.finance_tracker_client.manage_categories.presentation.Manage
 import com.robotbot.finance_tracker_client.root.RootComponent.Child
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.Accounts
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.Categories
+import com.robotbot.finance_tracker_client.root.RootComponent.Child.ChooseAccount
+import com.robotbot.finance_tracker_client.root.RootComponent.Child.CreateTransfer
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.CurrencyChoose
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.ManageAccounts
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.ManageCategories
@@ -36,6 +41,8 @@ internal class DefaultRootComponent @AssistedInject constructor(
     private val chooseIconComponentFactory: ChooseIconComponent.Factory,
     private val manageCategoriesComponentFactory: ManageCategoriesComponent.Factory,
     private val categoriesComponentFactory: CategoriesComponent.Factory,
+    private val createTransferComponentFactory: CreateTransferComponent.Factory,
+    private val chooseAccountComponentFactory: ChooseAccountComponent.Factory,
     @Assisted componentContext: ComponentContext
 ) : RootComponent, ComponentContext by componentContext {
 
@@ -67,24 +74,39 @@ internal class DefaultRootComponent @AssistedInject constructor(
                     childComponentContext
                 )
             )
+
             is Config.CurrencyChoose -> CurrencyChoose(
                 currenciesComponent(
                     config.selectedCurrencyCode,
                     childComponentContext
                 )
             )
+
             is Config.ChooseIcon -> Child.ChooseIcon(
                 chooseIconComponent(
                     config.yetSelectedIconId,
                     childComponentContext
                 )
             )
+
             Config.Categories -> Categories(categoriesComponent(childComponentContext))
             is Config.ManageCategories -> ManageCategories(
                 manageCategoriesComponent(
                     config.editableCategoryId,
                     childComponentContext
                 )
+            )
+
+            is Config.ChooseAccount -> ChooseAccount(
+                chooseAccountComponent(
+                    config.changingAccountQualifier,
+                    config.yetSelectedAccountId,
+                    childComponentContext
+                )
+            )
+
+            Config.CreateTransfer -> CreateTransfer(
+                createTransferComponent(childComponentContext)
             )
         }
 
@@ -97,8 +119,9 @@ internal class DefaultRootComponent @AssistedInject constructor(
     private fun accountsComponent(componentContext: ComponentContext): AccountsComponent =
         accountsComponentFactory(
             onAuthFailed = { navigation.pushNew(Config.Authorize) },
-            onCreateAccount = { navigation.pushNew(Config.ManageAccounts(null) ) },
+            onCreateAccount = { navigation.pushNew(Config.ManageAccounts(null)) },
             onEditAccount = { navigation.pushNew(Config.ManageAccounts(it)) },
+            onCreateTransfer = { navigation.pushNew(Config.CreateTransfer) },
             componentContext = componentContext
         )
 
@@ -147,7 +170,7 @@ internal class DefaultRootComponent @AssistedInject constructor(
                 }
             },
             componentContext = componentContext
-    )
+        )
 
     private fun categoriesComponent(
         componentContext: ComponentContext
@@ -165,6 +188,47 @@ internal class DefaultRootComponent @AssistedInject constructor(
             editableCategoryEntityId = editableCategoryId,
             onWorkFinished = { navigation.pop() },
             onChangeIcon = { navigation.pushNew(Config.ChooseIcon(it)) },
+            componentContext = componentContext
+        )
+
+    private fun createTransferComponent(
+        componentContext: ComponentContext
+    ): CreateTransferComponent =
+        createTransferComponentFactory(
+            onChangeAccountId = { changingAccountQualifier, yetSelectedAccountId ->
+                navigation.pushNew(
+                    Config.ChooseAccount(
+                        changingAccountQualifier, yetSelectedAccountId
+                    )
+                )
+            },
+            onTransferCreated = { navigation.pop() },
+            componentContext = componentContext
+        )
+
+    private fun chooseAccountComponent(
+        changingAccountQualifier: ChangingAccountQualifier,
+        yetSelectedAccountId: Long?,
+        componentContext: ComponentContext
+    ): ChooseAccountComponent =
+        chooseAccountComponentFactory(
+            yetSelectedAccountId = yetSelectedAccountId,
+            onAccountSelected = { newSelectedAccountId ->
+                navigation.pop {
+                    val currentChild = stack.active.instance
+                    if (currentChild is CreateTransfer) {
+                        when (changingAccountQualifier) {
+                            ChangingAccountQualifier.FROM -> {
+                                currentChild.component.onAccountFromIdChanged(newSelectedAccountId)
+                            }
+
+                            ChangingAccountQualifier.TO -> {
+                                currentChild.component.onAccountToIdChanged(newSelectedAccountId)
+                            }
+                        }
+                    }
+                }
+            },
             componentContext = componentContext
         )
 
@@ -191,6 +255,15 @@ internal class DefaultRootComponent @AssistedInject constructor(
 
         @Serializable
         data class ManageCategories(val editableCategoryId: Long?) : Config
+
+        @Serializable
+        data object CreateTransfer : Config
+
+        @Serializable
+        data class ChooseAccount(
+            val changingAccountQualifier: ChangingAccountQualifier,
+            val yetSelectedAccountId: Long?
+        ) : Config
     }
 
     @AssistedFactory

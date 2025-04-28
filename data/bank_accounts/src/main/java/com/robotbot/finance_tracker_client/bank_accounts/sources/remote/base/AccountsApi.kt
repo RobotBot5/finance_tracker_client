@@ -4,6 +4,7 @@ import com.robotbot.finance_tracker_client.bank_accounts.sources.remote.dto.Acco
 import com.robotbot.finance_tracker_client.bank_accounts.sources.remote.dto.AccountDto
 import com.robotbot.finance_tracker_client.bank_accounts.sources.remote.dto.AccountUpdateRequest
 import com.robotbot.finance_tracker_client.bank_accounts.sources.remote.dto.AccountsResponse
+import com.robotbot.finance_tracker_client.bank_accounts.sources.remote.dto.TransferCreateRequest
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -27,4 +28,7 @@ internal interface AccountsApi {
 
     @DELETE("accounts/{id}")
     suspend fun deleteAccount(@Path("id") id: Long)
+
+    @POST("accounts/transfer")
+    suspend fun transfer(@Body transferCreateRequest: TransferCreateRequest)
 }

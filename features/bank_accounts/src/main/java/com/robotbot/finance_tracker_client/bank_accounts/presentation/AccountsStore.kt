@@ -25,6 +25,8 @@ interface AccountsStore : Store<Intent, State, Label> {
         data object CreateAccountClicked : Intent
 
         data class OnAccountClicked(val accountId: Long) : Intent
+
+        data object OnCreateTransferClicked : Intent
     }
 
     data class State(val accountsState: AccountsState) {
@@ -47,6 +49,8 @@ interface AccountsStore : Store<Intent, State, Label> {
         data object CreateAccountNavigate : Label
 
         data class EditAccount(val accountId: Long) : Label
+
+        data object OnCreateTransferNavigate : Label
     }
 }
 
@@ -137,6 +141,7 @@ internal class AccountsStoreFactory @Inject constructor(
                 is Intent.OnAccountClicked -> {
                     publish(Label.EditAccount(intent.accountId))
                 }
+                Intent.OnCreateTransferClicked -> publish(Label.OnCreateTransferNavigate)
             }
         }
     }

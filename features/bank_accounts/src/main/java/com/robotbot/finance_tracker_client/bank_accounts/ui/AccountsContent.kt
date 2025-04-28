@@ -58,8 +58,14 @@ fun AccountsContent(component: AccountsComponent, modifier: Modifier = Modifier)
                         Text(text = "Add Account")
                     }
                 }
+                item {
+                    Button(
+                        onClick = { component.onCreateTransferClicked() }
+                    ) {
+                        Text(text = "Create transfer")
+                    }
+                }
             }
-
         }
         AccountsStore.State.AccountsState.Error -> {
             Text(text = "Error")

@@ -23,6 +23,8 @@ import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import com.robotbot.finance_tracker_client.authorize.ui.AuthorizeContent
 import com.robotbot.finance_tracker_client.bank_accounts.ui.AccountsContent
 import com.robotbot.finance_tracker_client.categories.ui.CategoriesContent
+import com.robotbot.finance_tracker_client.create_transfer.choose_account.ui.ChooseAccountContent
+import com.robotbot.finance_tracker_client.create_transfer.main.ui.CreateTransferContent
 import com.robotbot.finance_tracker_client.currency_choose.ui.ChooseCurrencyContent
 import com.robotbot.finance_tracker_client.icon_choose.ui.ChooseIconContent
 import com.robotbot.finance_tracker_client.manage_accounts.ui.ManageAccountsContent
@@ -30,7 +32,9 @@ import com.robotbot.finance_tracker_client.manage_categories.ui.ManageCategories
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.Accounts
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.Authorize
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.Categories
+import com.robotbot.finance_tracker_client.root.RootComponent.Child.ChooseAccount
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.ChooseIcon
+import com.robotbot.finance_tracker_client.root.RootComponent.Child.CreateTransfer
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.CurrencyChoose
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.ManageAccounts
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.ManageCategories
@@ -70,7 +74,7 @@ fun RootContent(component: RootComponent, modifier: Modifier = Modifier) {
                 modifier = modifier,
                 animation = stackAnimation { child ->
                     when (child.instance) {
-                        is Accounts, is ManageAccounts, is CurrencyChoose, is ChooseIcon, is Categories, is ManageCategories -> fade() + scale()
+                        is Accounts, is ManageAccounts, is CurrencyChoose, is ChooseIcon, is Categories, is ManageCategories, is CreateTransfer, is ChooseAccount -> fade() + scale()
                         is Authorize -> slide(orientation = Orientation.Vertical, animationSpec = tween(600))
                     }
                 }
@@ -83,6 +87,8 @@ fun RootContent(component: RootComponent, modifier: Modifier = Modifier) {
                     is ChooseIcon -> ChooseIconContent(component = child.component, modifier = Modifier.fillMaxWidth().padding(paddings))
                     is Categories -> CategoriesContent(component = child.component, modifier = Modifier.fillMaxWidth().padding(paddings))
                     is ManageCategories -> ManageCategoriesContent(component = child.component, modifier = Modifier.fillMaxWidth().padding(paddings))
+                    is ChooseAccount -> ChooseAccountContent(component = child.component, modifier = Modifier.fillMaxWidth().padding(paddings))
+                    is CreateTransfer -> CreateTransferContent(component = child.component, modifier = Modifier.fillMaxWidth().padding(paddings))
                 }
             }
         }

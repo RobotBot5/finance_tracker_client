@@ -11,11 +11,14 @@ interface AccountsComponent {
 
     fun onAccountClicked(accountId: Long)
 
+    fun onCreateTransferClicked()
+
     fun interface Factory {
         operator fun invoke(
             onAuthFailed: () -> Unit,
             onCreateAccount: () -> Unit,
             onEditAccount: (Long) -> Unit,
+            onCreateTransfer: () -> Unit,
             componentContext: ComponentContext
         ): AccountsComponent
     }

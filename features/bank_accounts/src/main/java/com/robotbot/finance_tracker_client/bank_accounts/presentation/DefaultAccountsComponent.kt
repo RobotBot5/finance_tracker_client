@@ -20,6 +20,7 @@ internal class DefaultAccountsComponent @AssistedInject constructor(
     @Assisted("onAuthFailed") private val onAuthFailed: () -> Unit,
     @Assisted("onCreateAccount") private val onCreateAccount: () -> Unit,
     @Assisted("onEditAccount") private val onEditAccount: (Long) -> Unit,
+    @Assisted("onCreateTransfer") private val onCreateTransfer: () -> Unit,
     @Assisted componentContext: ComponentContext
 ) : AccountsComponent, ComponentContext by componentContext {
 
@@ -33,6 +34,7 @@ internal class DefaultAccountsComponent @AssistedInject constructor(
                     Label.AuthFailed -> onAuthFailed()
                     Label.CreateAccountNavigate -> onCreateAccount()
                     is Label.EditAccount -> onEditAccount(it.accountId)
+                    Label.OnCreateTransferNavigate -> onCreateTransfer()
                 }
             }
         }
@@ -52,12 +54,17 @@ internal class DefaultAccountsComponent @AssistedInject constructor(
         store.accept(Intent.OnAccountClicked(accountId))
     }
 
+    override fun onCreateTransferClicked() {
+        store.accept(Intent.OnCreateTransferClicked)
+    }
+
     @AssistedFactory
     interface Factory : AccountsComponent.Factory {
         override fun invoke(
             @Assisted("onAuthFailed") onAuthFailed: () -> Unit,
             @Assisted("onCreateAccount") onCreateAccount: () -> Unit,
             @Assisted("onEditAccount") onEditAccount: (Long) -> Unit,
+            @Assisted("onCreateTransfer") onCreateTransfer: () -> Unit,
             componentContext: ComponentContext
         ): DefaultAccountsComponent
     }

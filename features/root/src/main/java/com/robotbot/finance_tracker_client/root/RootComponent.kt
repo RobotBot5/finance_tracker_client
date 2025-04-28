@@ -6,6 +6,8 @@ import com.arkivanov.decompose.value.Value
 import com.robotbot.finance_tracker_client.authorize.presentation.AuthorizeComponent
 import com.robotbot.finance_tracker_client.bank_accounts.presentation.AccountsComponent
 import com.robotbot.finance_tracker_client.categories.presentation.CategoriesComponent
+import com.robotbot.finance_tracker_client.create_transfer.choose_account.presentation.ChooseAccountComponent
+import com.robotbot.finance_tracker_client.create_transfer.main.presentation.CreateTransferComponent
 import com.robotbot.finance_tracker_client.currency_choose.presentation.CurrenciesComponent
 import com.robotbot.finance_tracker_client.icon_choose.presentation.ChooseIconComponent
 import com.robotbot.finance_tracker_client.manage_accounts.presentation.ManageAccountsComponent
@@ -32,6 +34,10 @@ interface RootComponent {
         data class Categories(val component: CategoriesComponent) : Child
 
         data class ManageCategories(val component: ManageCategoriesComponent) : Child
+
+        data class CreateTransfer(val component: CreateTransferComponent) : Child
+
+        data class ChooseAccount(val component: ChooseAccountComponent) : Child
     }
 
     fun interface Factory {

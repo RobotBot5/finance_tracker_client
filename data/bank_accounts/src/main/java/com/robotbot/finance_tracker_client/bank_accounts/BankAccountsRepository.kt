@@ -4,6 +4,7 @@ import com.robotbot.finance_tracker_client.bank_accounts.entities.AccountEntity
 import com.robotbot.finance_tracker_client.bank_accounts.sources.RemoteAccountsSource
 import com.robotbot.finance_tracker_client.bank_accounts.sources.remote.dto.AccountCreateRequest
 import com.robotbot.finance_tracker_client.bank_accounts.sources.remote.dto.AccountUpdateRequest
+import com.robotbot.finance_tracker_client.bank_accounts.sources.remote.dto.TransferCreateRequest
 import javax.inject.Inject
 
 interface BankAccountsRepository {
@@ -17,6 +18,8 @@ interface BankAccountsRepository {
     suspend fun updateAccount(id: Long, accountUpdateRequest: AccountUpdateRequest)
 
     suspend fun deleteAccount(id: Long)
+
+    suspend fun transfer(transferCreateRequest: TransferCreateRequest)
 }
 
 internal class RealBankAccountsRepository @Inject constructor(
@@ -39,5 +42,9 @@ internal class RealBankAccountsRepository @Inject constructor(
 
     override suspend fun deleteAccount(id: Long) {
         remoteAccountsSource.deleteAccount(id)
+    }
+
+    override suspend fun transfer(transferCreateRequest: TransferCreateRequest) {
+        remoteAccountsSource.transfer(transferCreateRequest)
     }
 }

@@ -6,6 +6,7 @@ import com.robotbot.finance_tracker_client.bank_accounts.sources.remote.base.Acc
 import com.robotbot.finance_tracker_client.bank_accounts.sources.remote.dto.AccountCreateRequest
 import com.robotbot.finance_tracker_client.bank_accounts.sources.remote.dto.AccountDto
 import com.robotbot.finance_tracker_client.bank_accounts.sources.remote.dto.AccountUpdateRequest
+import com.robotbot.finance_tracker_client.bank_accounts.sources.remote.dto.TransferCreateRequest
 import com.robotbot.finance_tracker_client.remote.util.wrapRetrofitExceptions
 import javax.inject.Inject
 
@@ -31,5 +32,9 @@ internal class RealRemoteAccountsSource @Inject constructor(
 
     override suspend fun deleteAccount(id: Long) = wrapRetrofitExceptions {
         accountsApi.deleteAccount(id)
+    }
+
+    override suspend fun transfer(transferCreateRequest: TransferCreateRequest) = wrapRetrofitExceptions {
+        accountsApi.transfer(transferCreateRequest)
     }
 }
