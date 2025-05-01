@@ -12,6 +12,9 @@ import com.robotbot.finance_tracker_client.currency_choose.presentation.Currenci
 import com.robotbot.finance_tracker_client.icon_choose.presentation.ChooseIconComponent
 import com.robotbot.finance_tracker_client.manage_accounts.presentation.ManageAccountsComponent
 import com.robotbot.finance_tracker_client.manage_categories.presentation.ManageCategoriesComponent
+import com.robotbot.finance_tracker_client.transactions.category_choose.presentation.CategoryChooseComponent
+import com.robotbot.finance_tracker_client.transactions.main.presentation.TransactionsComponent
+import com.robotbot.finance_tracker_client.transactions.manage.presentation.ManageTransactionsComponent
 
 interface RootComponent {
 
@@ -38,6 +41,12 @@ interface RootComponent {
         data class CreateTransfer(val component: CreateTransferComponent) : Child
 
         data class ChooseAccount(val component: ChooseAccountComponent) : Child
+
+        data class Transactions(val component: TransactionsComponent) : Child
+
+        data class ManageTransactions(val component: ManageTransactionsComponent) : Child
+
+        data class ChooseCategory(val component: CategoryChooseComponent) : Child
     }
 
     fun interface Factory {

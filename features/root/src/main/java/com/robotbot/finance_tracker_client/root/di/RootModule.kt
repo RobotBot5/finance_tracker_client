@@ -7,6 +7,7 @@ import com.robotbot.finance_tracker_client.currency_choose.di.CurrenciesFeatureM
 import com.robotbot.finance_tracker_client.icon_choose.di.ChooseIconFeatureModule
 import com.robotbot.finance_tracker_client.manage_accounts.di.ManageAccountsFeatureModule
 import com.robotbot.finance_tracker_client.manage_categories.di.ManageCategoriesFeatureModule
+import com.robotbot.finance_tracker_client.transactions.TransactionsFeatureModule
 import dagger.Module
 
 @Module(includes = [
@@ -18,6 +19,7 @@ import dagger.Module
     CategoriesFeatureModule::class,
     ManageCategoriesFeatureModule::class,
     CreateTransferFeatureModule::class,
+    TransactionsFeatureModule::class,
     ComponentFactoryModule::class
 ])
 interface RootModule

@@ -24,10 +24,16 @@ import com.robotbot.finance_tracker_client.root.RootComponent.Child
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.Accounts
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.Categories
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.ChooseAccount
+import com.robotbot.finance_tracker_client.root.RootComponent.Child.ChooseCategory
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.CreateTransfer
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.CurrencyChoose
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.ManageAccounts
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.ManageCategories
+import com.robotbot.finance_tracker_client.root.RootComponent.Child.ManageTransactions
+import com.robotbot.finance_tracker_client.root.RootComponent.Child.Transactions
+import com.robotbot.finance_tracker_client.transactions.category_choose.presentation.CategoryChooseComponent
+import com.robotbot.finance_tracker_client.transactions.main.presentation.TransactionsComponent
+import com.robotbot.finance_tracker_client.transactions.manage.presentation.ManageTransactionsComponent
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -43,6 +49,9 @@ internal class DefaultRootComponent @AssistedInject constructor(
     private val categoriesComponentFactory: CategoriesComponent.Factory,
     private val createTransferComponentFactory: CreateTransferComponent.Factory,
     private val chooseAccountComponentFactory: ChooseAccountComponent.Factory,
+    private val transactionsComponentFactory: TransactionsComponent.Factory,
+    private val manageTransactionsComponentFactory: ManageTransactionsComponent.Factory,
+    private val chooseCategoryComponentFactory: CategoryChooseComponent.Factory,
     @Assisted componentContext: ComponentContext
 ) : RootComponent, ComponentContext by componentContext {
 
@@ -61,6 +70,7 @@ internal class DefaultRootComponent @AssistedInject constructor(
         when (tab) {
             MainNavTab.Accounts -> navigation.replaceAll(Config.Accounts)
             MainNavTab.Categories -> navigation.replaceAll(Config.Categories)
+            MainNavTab.Transactions -> navigation.replaceAll(Config.Transactions)
         }
     }
 
@@ -74,21 +84,18 @@ internal class DefaultRootComponent @AssistedInject constructor(
                     childComponentContext
                 )
             )
-
             is Config.CurrencyChoose -> CurrencyChoose(
                 currenciesComponent(
                     config.selectedCurrencyCode,
                     childComponentContext
                 )
             )
-
             is Config.ChooseIcon -> Child.ChooseIcon(
                 chooseIconComponent(
                     config.yetSelectedIconId,
                     childComponentContext
                 )
             )
-
             Config.Categories -> Categories(categoriesComponent(childComponentContext))
             is Config.ManageCategories -> ManageCategories(
                 manageCategoriesComponent(
@@ -96,7 +103,6 @@ internal class DefaultRootComponent @AssistedInject constructor(
                     childComponentContext
                 )
             )
-
             is Config.ChooseAccount -> ChooseAccount(
                 chooseAccountComponent(
                     config.changingAccountQualifier,
@@ -104,9 +110,15 @@ internal class DefaultRootComponent @AssistedInject constructor(
                     childComponentContext
                 )
             )
-
             Config.CreateTransfer -> CreateTransfer(
                 createTransferComponent(childComponentContext)
+            )
+            Config.Transactions -> Transactions(transactionsComponent(childComponentContext))
+            is Config.ChooseCategory -> ChooseCategory(
+                chooseCategoryComponent(config.yetSelectedCategoryId, childComponentContext)
+            )
+            is Config.ManageTransactions -> ManageTransactions(
+                manageTransactionsComponent(config.editableTransactionId, childComponentContext)
             )
         }
 
@@ -227,10 +239,45 @@ internal class DefaultRootComponent @AssistedInject constructor(
                             }
                         }
                     }
+                    if (currentChild is ManageTransactions) {
+                        currentChild.component.onAccountChanged(newSelectedAccountId)
+                    }
                 }
             },
             componentContext = componentContext
         )
+
+    private fun transactionsComponent(componentContext: ComponentContext): TransactionsComponent =
+        transactionsComponentFactory(
+            onCreateTransactionNavigate = { navigation.pushNew(Config.ManageTransactions(it)) },
+            componentContext = componentContext
+        )
+
+    private fun manageTransactionsComponent(
+        editableTransactionId: Long?,
+        componentContext: ComponentContext
+    ): ManageTransactionsComponent =
+        manageTransactionsComponentFactory(
+            editableTransactionId = editableTransactionId,
+            onWorkFinished = { navigation.pop() },
+            onChooseCategory = { navigation.pushNew(Config.ChooseCategory(it)) },
+            onChooseAccount = { navigation.pushNew(Config.ChooseAccount(ChangingAccountQualifier.TO, it)) },
+            componentContext = componentContext
+        )
+
+    private fun chooseCategoryComponent(
+        yetSelectedCategoryId: Long?,
+        componentContext: ComponentContext
+    ): CategoryChooseComponent =
+        chooseCategoryComponentFactory(
+            yetSelectedCategoryId = yetSelectedCategoryId,
+            onCategorySelected = { newCategoryId ->
+                navigation.pop {(stack.active.instance as? ManageTransactions)
+                    ?.component?.onCategoryChanged(newCategoryId)
+            } },
+            componentContext = componentContext
+        )
+
 
     @Serializable
     private sealed interface Config {
@@ -264,6 +311,15 @@ internal class DefaultRootComponent @AssistedInject constructor(
             val changingAccountQualifier: ChangingAccountQualifier,
             val yetSelectedAccountId: Long?
         ) : Config
+
+        @Serializable
+        data object Transactions : Config
+
+        @Serializable
+        data class ManageTransactions(val editableTransactionId: Long?) : Config
+
+        @Serializable
+        data class ChooseCategory(val yetSelectedCategoryId: Long?) : Config
     }
 
     @AssistedFactory

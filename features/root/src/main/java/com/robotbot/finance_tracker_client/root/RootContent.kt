@@ -33,11 +33,17 @@ import com.robotbot.finance_tracker_client.root.RootComponent.Child.Accounts
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.Authorize
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.Categories
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.ChooseAccount
+import com.robotbot.finance_tracker_client.root.RootComponent.Child.ChooseCategory
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.ChooseIcon
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.CreateTransfer
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.CurrencyChoose
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.ManageAccounts
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.ManageCategories
+import com.robotbot.finance_tracker_client.root.RootComponent.Child.ManageTransactions
+import com.robotbot.finance_tracker_client.root.RootComponent.Child.Transactions
+import com.robotbot.finance_tracker_client.transactions.category_choose.ui.ChooseCategoryContent
+import com.robotbot.finance_tracker_client.transactions.main.ui.TransactionsContent
+import com.robotbot.finance_tracker_client.transactions.manage.ui.ManageTransactionsContent
 import com.robotbot.finance_tracker_client.ui.theme.FinanceTrackerTheme
 
 @Composable
@@ -51,6 +57,7 @@ fun RootContent(component: RootComponent, modifier: Modifier = Modifier) {
             when (activeInstance) {
                 is Accounts -> MainNavTab.Accounts
                 is Categories -> MainNavTab.Categories
+                is Transactions -> MainNavTab.Transactions
                 else -> null
             }
         }
@@ -74,7 +81,7 @@ fun RootContent(component: RootComponent, modifier: Modifier = Modifier) {
                 modifier = modifier,
                 animation = stackAnimation { child ->
                     when (child.instance) {
-                        is Accounts, is ManageAccounts, is CurrencyChoose, is ChooseIcon, is Categories, is ManageCategories, is CreateTransfer, is ChooseAccount -> fade() + scale()
+                        is Accounts, is ManageAccounts, is CurrencyChoose, is ChooseIcon, is Categories, is ManageCategories, is CreateTransfer, is ChooseAccount, is Transactions, is ManageTransactions, is ChooseCategory -> fade() + scale()
                         is Authorize -> slide(orientation = Orientation.Vertical, animationSpec = tween(600))
                     }
                 }
@@ -89,6 +96,9 @@ fun RootContent(component: RootComponent, modifier: Modifier = Modifier) {
                     is ManageCategories -> ManageCategoriesContent(component = child.component, modifier = Modifier.fillMaxWidth().padding(paddings))
                     is ChooseAccount -> ChooseAccountContent(component = child.component, modifier = Modifier.fillMaxWidth().padding(paddings))
                     is CreateTransfer -> CreateTransferContent(component = child.component, modifier = Modifier.fillMaxWidth().padding(paddings))
+                    is Transactions -> TransactionsContent(component = child.component, modifier = Modifier.fillMaxWidth().padding(paddings))
+                    is ChooseCategory -> ChooseCategoryContent(component = child.component, modifier = Modifier.fillMaxWidth().padding(paddings))
+                    is ManageTransactions -> ManageTransactionsContent(component = child.component, Modifier.fillMaxWidth().padding(paddings))
                 }
             }
         }

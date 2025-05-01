@@ -19,7 +19,7 @@ suspend fun <T> wrapRetrofitExceptions(block: suspend () -> T): T {
     } catch (e: HttpException) {
         throw when {
             e.code() == 401 -> AuthException("Auth failed")
-            else -> BackendException(e.code(), "Unknown error")
+            else -> BackendException(e.code(), "Unknown error: ${e.code()}")
         }
     } catch (e: IOException) {
         throw ConnectionException(e)

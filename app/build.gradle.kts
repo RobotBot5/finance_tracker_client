@@ -70,6 +70,7 @@ dependencies {
     implementation(project(":data:bank_accounts"))
     implementation(project(":data:get_info"))
     implementation(project(":data:categories"))
+    implementation(project(":data:transactions"))
 
     implementation(project(":features:authorize"))
     implementation(project(":features:root"))
@@ -80,6 +81,7 @@ dependencies {
     implementation(project(":features:categories"))
     implementation(project(":features:manage_categories"))
     implementation(project(":features:create_transfer"))
+    implementation(project(":features:transactions"))
 
     implementation(project(":core:dependencies"))
     implementation(project(":core:remote"))
