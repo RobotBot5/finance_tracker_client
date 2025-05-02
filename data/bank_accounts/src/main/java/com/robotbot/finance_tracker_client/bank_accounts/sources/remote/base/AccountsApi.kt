@@ -4,6 +4,7 @@ import com.robotbot.finance_tracker_client.bank_accounts.sources.remote.dto.Acco
 import com.robotbot.finance_tracker_client.bank_accounts.sources.remote.dto.AccountDto
 import com.robotbot.finance_tracker_client.bank_accounts.sources.remote.dto.AccountUpdateRequest
 import com.robotbot.finance_tracker_client.bank_accounts.sources.remote.dto.AccountsResponse
+import com.robotbot.finance_tracker_client.bank_accounts.sources.remote.dto.TotalBalanceResponse
 import com.robotbot.finance_tracker_client.bank_accounts.sources.remote.dto.TransferCreateRequest
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -31,4 +32,7 @@ internal interface AccountsApi {
 
     @POST("accounts/transfer")
     suspend fun transfer(@Body transferCreateRequest: TransferCreateRequest)
+
+    @GET("accounts/total-balance")
+    suspend fun getTotalBalance(): TotalBalanceResponse
 }

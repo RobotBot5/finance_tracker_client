@@ -1,6 +1,7 @@
 package com.robotbot.finance_tracker_client.bank_accounts
 
 import com.robotbot.finance_tracker_client.bank_accounts.entities.AccountEntity
+import com.robotbot.finance_tracker_client.bank_accounts.entities.TotalBalanceEntity
 import com.robotbot.finance_tracker_client.bank_accounts.sources.RemoteAccountsSource
 import com.robotbot.finance_tracker_client.bank_accounts.sources.remote.dto.AccountCreateRequest
 import com.robotbot.finance_tracker_client.bank_accounts.sources.remote.dto.AccountUpdateRequest
@@ -20,6 +21,8 @@ interface BankAccountsRepository {
     suspend fun deleteAccount(id: Long)
 
     suspend fun transfer(transferCreateRequest: TransferCreateRequest)
+
+    suspend fun getTotalBalance(): TotalBalanceEntity
 }
 
 internal class RealBankAccountsRepository @Inject constructor(
@@ -46,5 +49,9 @@ internal class RealBankAccountsRepository @Inject constructor(
 
     override suspend fun transfer(transferCreateRequest: TransferCreateRequest) {
         remoteAccountsSource.transfer(transferCreateRequest)
+    }
+
+    override suspend fun getTotalBalance(): TotalBalanceEntity {
+        return remoteAccountsSource.getTotalBalance()
     }
 }

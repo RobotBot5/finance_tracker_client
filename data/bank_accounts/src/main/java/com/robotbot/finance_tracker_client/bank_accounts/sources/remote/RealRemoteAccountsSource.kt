@@ -1,6 +1,7 @@
 package com.robotbot.finance_tracker_client.bank_accounts.sources.remote
 
 import com.robotbot.finance_tracker_client.bank_accounts.entities.AccountEntity
+import com.robotbot.finance_tracker_client.bank_accounts.entities.TotalBalanceEntity
 import com.robotbot.finance_tracker_client.bank_accounts.sources.RemoteAccountsSource
 import com.robotbot.finance_tracker_client.bank_accounts.sources.remote.base.AccountsApi
 import com.robotbot.finance_tracker_client.bank_accounts.sources.remote.dto.AccountCreateRequest
@@ -36,5 +37,9 @@ internal class RealRemoteAccountsSource @Inject constructor(
 
     override suspend fun transfer(transferCreateRequest: TransferCreateRequest) = wrapRetrofitExceptions {
         accountsApi.transfer(transferCreateRequest)
+    }
+
+    override suspend fun getTotalBalance(): TotalBalanceEntity = wrapRetrofitExceptions {
+        accountsApi.getTotalBalance().toEntity()
     }
 }

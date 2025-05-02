@@ -1,9 +1,9 @@
 package com.robotbot.finance_tracker_client.bank_accounts.ui
 
+import android.annotation.SuppressLint
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,15 +16,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,8 +41,9 @@ import androidx.compose.ui.unit.dp
 import coil3.ImageLoader
 import coil3.compose.AsyncImage
 import com.robotbot.finance_tracker_client.bank_accounts.entities.AccountEntity
+import com.robotbot.finance_tracker_client.bank_accounts.entities.TotalBalanceEntity
 import com.robotbot.finance_tracker_client.bank_accounts.presentation.AccountsComponent
-import com.robotbot.finance_tracker_client.bank_accounts.presentation.AccountsStore
+import com.robotbot.finance_tracker_client.bank_accounts.presentation.AccountsStore.State
 import com.robotbot.finance_tracker_client.get_info.entities.CurrencyEntity
 import com.robotbot.finance_tracker_client.get_info.entities.IconEntity
 import com.robotbot.finance_tracker_client.remote.util.BASE_URL
@@ -56,86 +57,104 @@ fun AccountsContent(component: AccountsComponent, modifier: Modifier = Modifier)
     val state by component.model.collectAsState()
 
     when (val accountsState = state.accountsState) {
-        AccountsStore.State.AccountsState.Initial -> {
+        State.AccountsState.Initial -> {
 
         }
 
-        is AccountsStore.State.AccountsState.Content -> {
+        is State.AccountsState.Content -> {
             AccountsList(
                 accounts = accountsState.accounts,
+                totalBalanceState = state.totalBalanceState,
                 onAccountClicked = component::onAccountClicked,
                 onCreateTransferClicked = component::onCreateTransferClicked,
+                onCreateAccountClicked = component::onCreateAccountClicked,
                 modifier = modifier
             )
         }
 
-        AccountsStore.State.AccountsState.Error -> {
+        State.AccountsState.Error -> {
             Text(text = "Error")
         }
 
-        AccountsStore.State.AccountsState.Loading -> {
+        State.AccountsState.Loading -> {
             Text(text = "Loading")
         }
     }
 }
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 private fun AccountsList(
     accounts: List<AccountEntity>,
+    totalBalanceState: State.TotalBalanceState,
     onAccountClicked: (Long) -> Unit,
     onCreateTransferClicked: () -> Unit,
+    onCreateAccountClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier.padding(horizontal = 16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Card(
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-            )
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
+    Scaffold(
+        modifier = modifier,
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onCreateAccountClicked
             ) {
-                Text(
-                    text = "Total Balance",
-                    style = MaterialTheme.typography.labelLarge
-                )
-                Text(
-                    text = "100000 руб.",
-                    style = MaterialTheme.typography.titleLarge
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Button(
-                        onClick = onCreateTransferClicked,
-                    ) {
-                        Text(text = "Transfer")
-                    }
-                    Button(
-                        onClick = {}
-                    ) { Text(text = "Transfer History") }
-                }
+                Icon(imageVector = Icons.Default.Add, contentDescription = null)
             }
         }
-        LazyColumn(modifier = modifier) {
-            items(
-                items = accounts,
-                key = { it.id }
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                ),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
             ) {
-                AccountItem(it, onAccountClicked)
-            }
-            item {
-                Button(
-                    onClick = {}
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
                 ) {
-                    Text(text = "Add Account")
+                    Text(
+                        text = "Total Balance",
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                    val text = when (totalBalanceState) {
+                        State.TotalBalanceState.Initial -> ""
+                        State.TotalBalanceState.Loading -> "Loading"
+                        State.TotalBalanceState.Error -> "Error"
+                        is State.TotalBalanceState.Content -> {
+                            "${totalBalanceState.totalBalance.totalBalance.toPlainString()}${totalBalanceState.totalBalance.targetCurrency.symbol}"
+                        }
+                    }
+                    Text(
+                        text = text,
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Button(
+                            onClick = onCreateTransferClicked,
+                        ) {
+                            Text(text = "Transfer")
+                        }
+                        Button(
+                            onClick = {}
+                        ) { Text(text = "Transfer History") }
+                    }
+                }
+            }
+            LazyColumn {
+                items(
+                    items = accounts,
+                    key = { it.id }
+                ) {
+                    AccountItem(it, onAccountClicked)
                 }
             }
         }
@@ -195,18 +214,20 @@ private fun AccountItem(
     }
 }
 
-@Preview
+@Preview("light")
 @Composable
-private fun AccountsListPreview() {
+private fun AccountsListPreviewLight() {
     val accounts = buildList {
         repeat(5) {
-            add(AccountEntity(
-                id = it.toLong(),
-                name = "Name: $it",
-                currency = CurrencyEntity(code = "USD", symbol = "$", name = "dollars"),
-                balance = BigDecimal.valueOf((it * 100).toLong()),
-                icon = IconEntity(id = 1, name = "name", path = "path")
-            ))
+            add(
+                AccountEntity(
+                    id = it.toLong(),
+                    name = "Name: $it",
+                    currency = CurrencyEntity(code = "USD", symbol = "$", name = "dollars"),
+                    balance = BigDecimal.valueOf((it * 100).toLong()),
+                    icon = IconEntity(id = 1, name = "name", path = "path")
+                )
+            )
         }
     }
 
@@ -214,8 +235,58 @@ private fun AccountsListPreview() {
         Surface(modifier = Modifier.fillMaxSize()) {
             AccountsList(
                 accounts = accounts,
+                totalBalanceState = State.TotalBalanceState.Content(
+                    TotalBalanceEntity(
+                        totalBalance = BigDecimal.valueOf(1000),
+                        targetCurrency = CurrencyEntity(
+                            code = "USD",
+                            symbol = "$",
+                            name = "dollars"
+                        )
+                    )
+                ),
                 onAccountClicked = {},
-                onCreateTransferClicked = {}
+                onCreateTransferClicked = {},
+                onCreateAccountClicked = {}
+            )
+        }
+    }
+}
+
+@Preview(name = "dark")
+@Composable
+private fun AccountsListPreviewDark() {
+    val accounts = buildList {
+        repeat(5) {
+            add(
+                AccountEntity(
+                    id = it.toLong(),
+                    name = "Name: $it",
+                    currency = CurrencyEntity(code = "USD", symbol = "$", name = "dollars"),
+                    balance = BigDecimal.valueOf((it * 100).toLong()),
+                    icon = IconEntity(id = 1, name = "name", path = "path")
+                )
+            )
+        }
+    }
+
+    FinanceTrackerTheme(darkTheme = true) {
+        Surface(modifier = Modifier.fillMaxSize()) {
+            AccountsList(
+                accounts = accounts,
+                totalBalanceState = State.TotalBalanceState.Content(
+                    TotalBalanceEntity(
+                        totalBalance = BigDecimal.valueOf(1000),
+                        targetCurrency = CurrencyEntity(
+                            code = "USD",
+                            symbol = "$",
+                            name = "dollars"
+                        )
+                    )
+                ),
+                onAccountClicked = {},
+                onCreateTransferClicked = {},
+                onCreateAccountClicked = {}
             )
         }
     }

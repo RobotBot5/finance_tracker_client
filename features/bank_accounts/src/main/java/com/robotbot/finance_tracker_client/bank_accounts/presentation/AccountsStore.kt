@@ -8,10 +8,12 @@ import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
 import com.robotbot.common.AuthException
 import com.robotbot.finance_tracker_client.bank_accounts.BankAccountsRepository
 import com.robotbot.finance_tracker_client.bank_accounts.entities.AccountEntity
+import com.robotbot.finance_tracker_client.bank_accounts.entities.TotalBalanceEntity
 import com.robotbot.finance_tracker_client.bank_accounts.presentation.AccountsStore.Intent
 import com.robotbot.finance_tracker_client.bank_accounts.presentation.AccountsStore.Label
 import com.robotbot.finance_tracker_client.bank_accounts.presentation.AccountsStore.State
 import com.robotbot.finance_tracker_client.bank_accounts.presentation.AccountsStore.State.AccountsState
+import com.robotbot.finance_tracker_client.bank_accounts.presentation.AccountsStore.State.TotalBalanceState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -29,7 +31,10 @@ interface AccountsStore : Store<Intent, State, Label> {
         data object OnCreateTransferClicked : Intent
     }
 
-    data class State(val accountsState: AccountsState) {
+    data class State(
+        val accountsState: AccountsState,
+        val totalBalanceState: TotalBalanceState
+    ) {
 
         sealed interface AccountsState {
 
@@ -39,6 +44,15 @@ interface AccountsStore : Store<Intent, State, Label> {
             data class Content(
                 val accounts: List<AccountEntity>
             ) : AccountsState
+        }
+
+        sealed interface TotalBalanceState {
+            data object Initial : TotalBalanceState
+            data object Loading : TotalBalanceState
+            data object Error : TotalBalanceState
+            data class Content(
+                val totalBalance: TotalBalanceEntity
+            ) : TotalBalanceState
         }
     }
 
@@ -60,11 +74,15 @@ internal class AccountsStoreFactory @Inject constructor(
 ) {
 
     private var loadAccountsJob: Job? = null
+    private var totalBalanceLoadingJob: Job? = null
 
     fun create(): AccountsStore =
         object : AccountsStore, Store<Intent, State, Label> by storeFactory.create(
             name = "AccountsStore",
-            initialState = State(accountsState = AccountsState.Initial),
+            initialState = State(
+                accountsState = AccountsState.Initial,
+                totalBalanceState = TotalBalanceState.Initial
+            ),
             bootstrapper = BootstrapperImpl(),
             executorFactory = ::ExecutorImpl,
             reducer = ReducerImpl
@@ -79,6 +97,8 @@ internal class AccountsStoreFactory @Inject constructor(
         data class AccountsContent(val accounts: List<AccountEntity>) : Action
 
         data object AuthFailed : Action
+
+        data class TotalBalanceStateChanged(val totalBalanceState: TotalBalanceState) : Action
     }
 
     private sealed interface Msg {
@@ -88,6 +108,8 @@ internal class AccountsStoreFactory @Inject constructor(
         data object AccountsError : Msg
 
         data class AccountsContent(val accounts: List<AccountEntity>) : Msg
+
+        data class TotalBalanceStateChanged(val totalBalanceState: TotalBalanceState) : Msg
     }
 
     private inner class BootstrapperImpl : CoroutineBootstrapper<Action>() {
@@ -104,6 +126,17 @@ internal class AccountsStoreFactory @Inject constructor(
                     dispatch(Action.AccountsError)
                 }
             }
+            dispatch(Action.TotalBalanceStateChanged(TotalBalanceState.Loading))
+            totalBalanceLoadingJob = scope.launch {
+                try {
+                    val totalBalance = accountsRepository.getTotalBalance()
+                    dispatch(Action.TotalBalanceStateChanged(TotalBalanceState.Content(totalBalance)))
+                } catch (e: AuthException) {
+                    dispatch(Action.AuthFailed)
+                } catch (e: Exception) {
+                    dispatch(Action.TotalBalanceStateChanged(TotalBalanceState.Error))
+                }
+            }
         }
     }
 
@@ -115,6 +148,7 @@ internal class AccountsStoreFactory @Inject constructor(
                 Action.AccountsError -> dispatch(Msg.AccountsError)
                 Action.AccountsLoading -> dispatch(Msg.AccountsLoading)
                 Action.AuthFailed -> publish(Label.AuthFailed)
+                is Action.TotalBalanceStateChanged -> dispatch(Msg.TotalBalanceStateChanged(action.totalBalanceState))
             }
         }
 
@@ -134,6 +168,24 @@ internal class AccountsStoreFactory @Inject constructor(
                             dispatch(Msg.AccountsError)
                         }
                     }
+                    totalBalanceLoadingJob?.cancel()
+                    dispatch(Msg.TotalBalanceStateChanged(TotalBalanceState.Loading))
+                    totalBalanceLoadingJob = scope.launch {
+                        try {
+                            val totalBalance = accountsRepository.getTotalBalance()
+                            dispatch(
+                                Msg.TotalBalanceStateChanged(
+                                    TotalBalanceState.Content(
+                                        totalBalance
+                                    )
+                                )
+                            )
+                        } catch (e: AuthException) {
+                            publish(Label.AuthFailed)
+                        } catch (e: Exception) {
+                            dispatch(Msg.TotalBalanceStateChanged(TotalBalanceState.Error))
+                        }
+                    }
                 }
                 Intent.CreateAccountClicked -> {
                     publish(Label.CreateAccountNavigate)
@@ -151,6 +203,7 @@ internal class AccountsStoreFactory @Inject constructor(
             is Msg.AccountsContent -> copy(accountsState = AccountsState.Content(msg.accounts))
             Msg.AccountsError -> copy(accountsState = AccountsState.Error)
             Msg.AccountsLoading -> copy(accountsState = AccountsState.Loading)
+            is Msg.TotalBalanceStateChanged -> copy(totalBalanceState = msg.totalBalanceState)
         }
     }
 }
