@@ -22,7 +22,7 @@ import com.arkivanov.decompose.extensions.compose.stack.animation.stackAnimation
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import com.robotbot.finance_tracker_client.authorize.ui.AuthorizeContent
 import com.robotbot.finance_tracker_client.bank_accounts.ui.AccountsContent
-import com.robotbot.finance_tracker_client.categories.ui.CategoriesContent
+import com.robotbot.finance_tracker_client.categories.main.MainCategoriesContent
 import com.robotbot.finance_tracker_client.create_transfer.choose_account.ui.ChooseAccountContent
 import com.robotbot.finance_tracker_client.create_transfer.main.ui.CreateTransferContent
 import com.robotbot.finance_tracker_client.currency_choose.ui.ChooseCurrencyContent
@@ -88,17 +88,42 @@ fun RootContent(component: RootComponent, modifier: Modifier = Modifier) {
             ) {
                 when (val child = it.instance) {
                     is Authorize -> AuthorizeContent(component = child.component, modifier = Modifier.fillMaxWidth())
-                    is Accounts -> AccountsContent(component = child.component, modifier = Modifier.fillMaxWidth().padding(paddings))
-                    is ManageAccounts -> ManageAccountsContent(component = child.component, modifier = Modifier.fillMaxWidth().padding(paddings))
-                    is CurrencyChoose -> ChooseCurrencyContent(component = child.component, modifier = Modifier.fillMaxWidth().padding(paddings))
-                    is ChooseIcon -> ChooseIconContent(component = child.component, modifier = Modifier.fillMaxWidth().padding(paddings))
-                    is Categories -> CategoriesContent(component = child.component, modifier = Modifier.fillMaxWidth().padding(paddings))
-                    is ManageCategories -> ManageCategoriesContent(component = child.component, modifier = Modifier.fillMaxWidth().padding(paddings))
-                    is ChooseAccount -> ChooseAccountContent(component = child.component, modifier = Modifier.fillMaxWidth().padding(paddings))
-                    is CreateTransfer -> CreateTransferContent(component = child.component, modifier = Modifier.fillMaxWidth().padding(paddings))
-                    is Transactions -> TransactionsContent(component = child.component, modifier = Modifier.fillMaxWidth().padding(paddings))
-                    is ChooseCategory -> ChooseCategoryContent(component = child.component, modifier = Modifier.fillMaxWidth().padding(paddings))
-                    is ManageTransactions -> ManageTransactionsContent(component = child.component, Modifier.fillMaxWidth().padding(paddings))
+                    is Accounts -> AccountsContent(component = child.component, modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(paddings))
+                    is ManageAccounts -> ManageAccountsContent(component = child.component, modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(paddings))
+                    is CurrencyChoose -> ChooseCurrencyContent(component = child.component, modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(paddings))
+                    is ChooseIcon -> ChooseIconContent(component = child.component, modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(paddings))
+                    is Categories -> MainCategoriesContent(
+                        component = child.component,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(paddings)
+                    )
+                    is ManageCategories -> ManageCategoriesContent(component = child.component, modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(paddings))
+                    is ChooseAccount -> ChooseAccountContent(component = child.component, modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(paddings))
+                    is CreateTransfer -> CreateTransferContent(component = child.component, modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(paddings))
+                    is Transactions -> TransactionsContent(component = child.component, modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(paddings))
+                    is ChooseCategory -> ChooseCategoryContent(component = child.component, modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(paddings))
+                    is ManageTransactions -> ManageTransactionsContent(component = child.component, Modifier
+                        .fillMaxWidth()
+                        .padding(paddings))
                 }
             }
         }

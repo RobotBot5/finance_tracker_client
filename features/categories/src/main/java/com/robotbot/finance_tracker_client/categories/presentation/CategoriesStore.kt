@@ -7,6 +7,7 @@ import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineBootstrapper
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
 import com.robotbot.finance_tracker_client.categories.CategoriesRepository
 import com.robotbot.finance_tracker_client.categories.entities.CategoryEntity
+import com.robotbot.finance_tracker_client.categories.entities.CategoryType
 import com.robotbot.finance_tracker_client.categories.presentation.CategoriesStore.Intent
 import com.robotbot.finance_tracker_client.categories.presentation.CategoriesStore.Label
 import com.robotbot.finance_tracker_client.categories.presentation.CategoriesStore.State
@@ -54,12 +55,12 @@ internal class CategoriesStoreFactory @Inject constructor(
 
     private var loadCategoriesJob: Job? = null
 
-    fun create(): CategoriesStore =
+    fun create(categoryType: CategoryType): CategoriesStore =
         object : CategoriesStore, Store<Intent, State, Label> by storeFactory.create(
             name = "CategoriesStore",
             initialState = State(CategoriesState.Initial),
-            bootstrapper = BootstrapperImpl(),
-            executorFactory = ::ExecutorImpl,
+            bootstrapper = BootstrapperImpl(categoryType),
+            executorFactory = { ExecutorImpl(categoryType) },
             reducer = ReducerImpl
         ) {}
 
@@ -81,12 +82,13 @@ internal class CategoriesStoreFactory @Inject constructor(
         data class CategoriesContent(val categories: List<CategoryEntity>) : Msg
     }
 
-    private inner class BootstrapperImpl : CoroutineBootstrapper<Action>() {
+    private inner class BootstrapperImpl(private val categoryType: CategoryType) :
+        CoroutineBootstrapper<Action>() {
         override fun invoke() {
             dispatch(Action.CategoriesLoading)
             loadCategoriesJob = scope.launch {
                 try {
-                    val categories = categoriesRepository.getCategories()
+                    val categories = categoriesRepository.getCategoriesByType(categoryType)
                     dispatch(Action.CategoriesContent(categories))
                 }
                 catch (e: Exception) {
@@ -96,7 +98,8 @@ internal class CategoriesStoreFactory @Inject constructor(
         }
     }
 
-    private inner class ExecutorImpl : CoroutineExecutor<Intent, Action, State, Msg, Label>() {
+    private inner class ExecutorImpl(private val categoryType: CategoryType) :
+        CoroutineExecutor<Intent, Action, State, Msg, Label>() {
         override fun executeAction(action: Action) {
             when (action) {
                 is Action.CategoriesContent -> dispatch(Msg.CategoriesContent(action.categories))
@@ -112,7 +115,7 @@ internal class CategoriesStoreFactory @Inject constructor(
                     dispatch(Msg.CategoriesLoading)
                     loadCategoriesJob = scope.launch {
                         try {
-                            val categories = categoriesRepository.getCategories()
+                            val categories = categoriesRepository.getCategoriesByType(categoryType)
                             dispatch(Msg.CategoriesContent(categories))
                         }
                         catch (e: Exception) {

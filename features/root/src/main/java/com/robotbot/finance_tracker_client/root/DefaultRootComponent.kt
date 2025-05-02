@@ -5,14 +5,13 @@ import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.active
 import com.arkivanov.decompose.router.stack.childStack
-import com.arkivanov.decompose.router.stack.navigate
 import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.pushNew
 import com.arkivanov.decompose.router.stack.replaceAll
 import com.arkivanov.decompose.value.Value
 import com.robotbot.finance_tracker_client.authorize.presentation.AuthorizeComponent
 import com.robotbot.finance_tracker_client.bank_accounts.presentation.AccountsComponent
-import com.robotbot.finance_tracker_client.categories.presentation.CategoriesComponent
+import com.robotbot.finance_tracker_client.categories.main.RootCategoriesComponent
 import com.robotbot.finance_tracker_client.create_transfer.ChangingAccountQualifier
 import com.robotbot.finance_tracker_client.create_transfer.choose_account.presentation.ChooseAccountComponent
 import com.robotbot.finance_tracker_client.create_transfer.main.presentation.CreateTransferComponent
@@ -46,7 +45,7 @@ internal class DefaultRootComponent @AssistedInject constructor(
     private val currenciesComponentFactory: CurrenciesComponent.Factory,
     private val chooseIconComponentFactory: ChooseIconComponent.Factory,
     private val manageCategoriesComponentFactory: ManageCategoriesComponent.Factory,
-    private val categoriesComponentFactory: CategoriesComponent.Factory,
+    private val rootCategoriesComponentFactory: RootCategoriesComponent.Factory,
     private val createTransferComponentFactory: CreateTransferComponent.Factory,
     private val chooseAccountComponentFactory: ChooseAccountComponent.Factory,
     private val transactionsComponentFactory: TransactionsComponent.Factory,
@@ -186,9 +185,9 @@ internal class DefaultRootComponent @AssistedInject constructor(
 
     private fun categoriesComponent(
         componentContext: ComponentContext
-    ): CategoriesComponent = categoriesComponentFactory(
-        onEditAccount = { navigation.pushNew(Config.ManageCategories(it)) },
-        onCreateAccount = { navigation.pushNew(Config.ManageCategories(null)) },
+    ): RootCategoriesComponent = rootCategoriesComponentFactory(
+        onEditCategoryNavigate = { navigation.pushNew(Config.ManageCategories(it)) },
+        onCreateCategoryNavigate = { navigation.pushNew(Config.ManageCategories(null)) },
         componentContext = componentContext
     )
 

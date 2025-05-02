@@ -17,6 +17,8 @@ internal interface RemoteCategoriesSource {
 
     suspend fun createCategory(categoryCreateRequest: CategoryCreateRequest)
 
+    suspend fun getCategoriesByType(isExpense: Boolean): List<CategoryEntity>
+
     suspend fun deleteCategory(id: Long)
 }
 
@@ -39,6 +41,11 @@ internal class RealRemoteCategoriesSource @Inject constructor(
     override suspend fun createCategory(categoryCreateRequest: CategoryCreateRequest) = wrapRetrofitExceptions {
         api.addCategory(categoryCreateRequest)
     }
+
+    override suspend fun getCategoriesByType(isExpense: Boolean): List<CategoryEntity> =
+        wrapRetrofitExceptions {
+            api.getCategoriesByType(isExpense).toEntities()
+        }
 
     override suspend fun deleteCategory(id: Long) = wrapRetrofitExceptions {
         api.deleteCategory(id)

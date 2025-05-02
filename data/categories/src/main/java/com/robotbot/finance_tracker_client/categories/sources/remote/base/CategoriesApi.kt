@@ -10,11 +10,15 @@ import retrofit2.http.GET
 import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 internal interface CategoriesApi {
 
     @GET("categories")
     suspend fun getCategories(): GetCategoriesResponse
+
+    @GET("categories")
+    suspend fun getCategoriesByType(@Query("isExpense") isExpense: Boolean): GetCategoriesResponse
 
     @GET("categories/{id}")
     suspend fun getCategoryById(@Path("id") id: Long): CategoryDto
