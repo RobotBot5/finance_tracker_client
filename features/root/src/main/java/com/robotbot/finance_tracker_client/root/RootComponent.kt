@@ -13,8 +13,8 @@ import com.robotbot.finance_tracker_client.icon_choose.presentation.ChooseIconCo
 import com.robotbot.finance_tracker_client.manage_accounts.presentation.ManageAccountsComponent
 import com.robotbot.finance_tracker_client.manage_categories.presentation.ManageCategoriesComponent
 import com.robotbot.finance_tracker_client.transactions.category_choose.presentation.CategoryChooseComponent
-import com.robotbot.finance_tracker_client.transactions.main.presentation.TransactionsComponent
 import com.robotbot.finance_tracker_client.transactions.manage.presentation.ManageTransactionsComponent
+import com.robotbot.finance_tracker_client.transactions.root.RootTransactionsComponent
 
 interface RootComponent {
 
@@ -42,7 +42,7 @@ interface RootComponent {
 
         data class ChooseAccount(val component: ChooseAccountComponent) : Child
 
-        data class Transactions(val component: TransactionsComponent) : Child
+        data class Transactions(val component: RootTransactionsComponent) : Child
 
         data class ManageTransactions(val component: ManageTransactionsComponent) : Child
 

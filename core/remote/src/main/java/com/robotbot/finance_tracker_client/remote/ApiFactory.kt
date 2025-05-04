@@ -4,12 +4,12 @@ import android.annotation.SuppressLint
 import com.google.gson.GsonBuilder
 import com.robotbot.finance_tracker_client.remote.token.AuthInterceptor
 import com.robotbot.finance_tracker_client.remote.util.BASE_URL
-import com.robotbot.finance_tracker_client.remote.util.OffsetDateTimeTypeAdapter
+import com.robotbot.finance_tracker_client.remote.util.LocalDateTypeAdapter
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.time.OffsetDateTime
+import java.time.LocalDate
 import javax.inject.Inject
 
 internal class ApiFactory @Inject constructor(
@@ -18,7 +18,7 @@ internal class ApiFactory @Inject constructor(
 
     @SuppressLint("NewApi")
     private val gson = GsonBuilder()
-        .registerTypeAdapter(OffsetDateTime::class.java, OffsetDateTimeTypeAdapter())
+        .registerTypeAdapter(LocalDate::class.java, LocalDateTypeAdapter())
         .create()
 
     private val okHttpClient = OkHttpClient.Builder()

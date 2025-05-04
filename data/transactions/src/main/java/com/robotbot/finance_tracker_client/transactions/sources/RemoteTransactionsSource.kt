@@ -13,6 +13,8 @@ internal interface RemoteTransactionsSource {
 
     suspend fun getTransactionById(id: Long): TransactionEntity
 
+    suspend fun getTransactionsByType(isExpense: Boolean): List<TransactionEntity>
+
     suspend fun addTransaction(createTransactionRequest: CreateTransactionRequest)
 
     suspend fun deleteTransaction(id: Long)
@@ -31,6 +33,11 @@ internal class RealRemoteTransactionsSource @Inject constructor(
     override suspend fun getTransactionById(id: Long): TransactionEntity = wrapRetrofitExceptions {
         api.getTransactionById(id).toEntity()
     }
+
+    override suspend fun getTransactionsByType(isExpense: Boolean): List<TransactionEntity> =
+        wrapRetrofitExceptions {
+            api.getTransactionsByType(isExpense).toEntities()
+        }
 
     override suspend fun addTransaction(createTransactionRequest: CreateTransactionRequest) = wrapRetrofitExceptions {
         api.addTransaction(createTransactionRequest)

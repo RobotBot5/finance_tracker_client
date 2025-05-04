@@ -5,6 +5,7 @@ import com.robotbot.finance_tracker_client.transactions.category_choose.di.Categ
 import com.robotbot.finance_tracker_client.transactions.di.TransactionsDataModule
 import com.robotbot.finance_tracker_client.transactions.main.di.TransactionsComponentFactoryModule
 import com.robotbot.finance_tracker_client.transactions.manage.di.ManageTransactionsComponentFactoryModule
+import com.robotbot.finance_tracker_client.transactions.root.di.RootTransactionComponentFactoryModule
 import dagger.Module
 
 @Module(includes = [
@@ -12,6 +13,7 @@ import dagger.Module
     ManageTransactionsComponentFactoryModule::class,
 //    AccountChooseComponentFactoryModule::class,
     CategoryChooseComponentFactoryModule::class,
+    RootTransactionComponentFactoryModule::class,
     TransactionsDataModule::class
 ])
 interface TransactionsFeatureModule

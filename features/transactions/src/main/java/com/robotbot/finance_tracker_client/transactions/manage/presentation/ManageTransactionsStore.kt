@@ -21,7 +21,7 @@ import com.robotbot.finance_tracker_client.transactions.sources.remote.dto.Creat
 import com.robotbot.finance_tracker_client.transactions.sources.remote.dto.UpdateTransactionRequest
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
-import java.time.OffsetDateTime
+import java.time.LocalDate
 import javax.inject.Inject
 
 interface ManageTransactionsStore : Store<Intent, State, Label> {
@@ -30,7 +30,7 @@ interface ManageTransactionsStore : Store<Intent, State, Label> {
 
         data class ChangeAmount(val amountString: String) : Intent
 
-        data class ChangeTime(val timeString: String) : Intent
+        data class ChangeDate(val date: LocalDate) : Intent
 
         data class ChangeCategory(val categoryId: Long) : Intent
 
@@ -47,7 +47,7 @@ interface ManageTransactionsStore : Store<Intent, State, Label> {
 
     data class State(
         val amount: BigDecimal,
-        val time: OffsetDateTime,
+        val date: LocalDate,
         val category: CategoryEntity?,
         val account: AccountEntity?,
         val openReason: OpenReason,
@@ -78,7 +78,7 @@ internal class ManageTransactionsStoreFactory @Inject constructor(
             name = "ManageTransactionsStore",
             initialState = State(
                 amount = BigDecimal.ZERO,
-                time = OffsetDateTime.now(),
+                date = LocalDate.now(),
                 category = null,
                 account = null,
                 openReason = if (editableTransactionEntityId == null) ADD else EDIT,
@@ -101,7 +101,7 @@ internal class ManageTransactionsStoreFactory @Inject constructor(
 
         data class ChangeAmount(val amount: BigDecimal) : Msg
 
-        data class ChangeTime(val time: OffsetDateTime) : Msg
+        data class ChangeDate(val date: LocalDate) : Msg
 
         data class ChangeCategory(val category: CategoryEntity) : Msg
 
@@ -160,7 +160,7 @@ internal class ManageTransactionsStoreFactory @Inject constructor(
                     }
                 }
                 is Intent.ChangeAmount -> dispatch(Msg.ChangeAmount(intent.amountString.toBigDecimal()))
-                is Intent.ChangeTime -> dispatch(Msg.ChangeTime(OffsetDateTime.parse(intent.timeString)))
+                is Intent.ChangeDate -> dispatch(Msg.ChangeDate(intent.date))
                 Intent.ClickDelete -> {
                     scope.launch {
                         try {
@@ -176,7 +176,7 @@ internal class ManageTransactionsStoreFactory @Inject constructor(
                             amount = currentState.amount,
                             categoryId = currentState.category!!.id,
                             accountId = currentState.account!!.id,
-                            time = currentState.time
+                            date = currentState.date
                         )
                         scope.launch {
                             transactionsRepository.addTransaction(createTransactionRequest)
@@ -187,7 +187,7 @@ internal class ManageTransactionsStoreFactory @Inject constructor(
                             amount = currentState.amount,
                             categoryId = currentState.category?.id,
                             accountId = currentState.account?.id,
-                            time = currentState.time
+                            date = currentState.date
                         )
                         scope.launch {
                             transactionsRepository.updateTransaction(currentState.editableTransactionEntityId, updateTransactionRequest)
@@ -205,10 +205,10 @@ internal class ManageTransactionsStoreFactory @Inject constructor(
             is Msg.ChangeAmount -> copy(amount = msg.amount)
             is Msg.ChangeCategory -> copy(category = msg.category)
             is Msg.ChangeLoading -> copy(isLoading = msg.isLoading)
-            is Msg.ChangeTime -> copy(time = msg.time)
+            is Msg.ChangeDate -> copy(date = msg.date)
             is Msg.EditableTransactionEntityLoaded -> copy(
                 amount = msg.transaction.amount,
-                time = msg.transaction.time,
+                date = msg.transaction.date,
                 category = msg.transaction.category,
                 account = msg.transaction.account
             )

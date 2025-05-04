@@ -57,6 +57,8 @@ dependencies {
     implementation(libs.decompose.core)
     implementation(libs.decompose.compose)
 
+    implementation(libs.coil.compose)
+
     implementation(libs.dagger2)
     ksp(libs.dagger2.compiler)
 

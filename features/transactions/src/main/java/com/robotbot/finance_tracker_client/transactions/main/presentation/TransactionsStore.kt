@@ -5,6 +5,8 @@ import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineBootstrapper
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
+import com.robotbot.common.toFullString
+import com.robotbot.finance_tracker_client.categories.entities.CategoryType
 import com.robotbot.finance_tracker_client.transactions.TransactionsRepository
 import com.robotbot.finance_tracker_client.transactions.entities.TransactionEntity
 import com.robotbot.finance_tracker_client.transactions.main.presentation.TransactionsStore.Intent
@@ -32,8 +34,14 @@ interface TransactionsStore : Store<Intent, State, Label> {
             data object Initial : TransactionsState
             data object Loading : TransactionsState
             data class Error(val errorMsg: String) : TransactionsState
-            data class Content(val transactions: List<TransactionEntity>) : TransactionsState
+            data class Content(val transactions: List<GroupedByDateTransactions>) :
+                TransactionsState
         }
+
+        data class GroupedByDateTransactions(
+            val dateLabel: String,
+            val transactions: List<TransactionEntity>
+        )
     }
 
     sealed interface Label {
@@ -47,11 +55,11 @@ internal class TransactionsStoreFactory @Inject constructor(
     private val transactionsRepository: TransactionsRepository
 ) {
 
-    fun create(): TransactionsStore =
+    fun create(transactionType: CategoryType): TransactionsStore =
         object : TransactionsStore, Store<Intent, State, Label> by storeFactory.create(
             name = "TransactionsStore",
             initialState = State(transactionsState = TransactionsState.Initial),
-            bootstrapper = BootstrapperImpl(),
+            bootstrapper = BootstrapperImpl(transactionType),
             executorFactory = ::ExecutorImpl,
             reducer = ReducerImpl
         ) {}
@@ -66,13 +74,27 @@ internal class TransactionsStoreFactory @Inject constructor(
         data class ChangeTransactionsState(val transactionsState: TransactionsState) : Msg
     }
 
-    private inner class BootstrapperImpl : CoroutineBootstrapper<Action>() {
+    private inner class BootstrapperImpl(private val transactionType: CategoryType) :
+        CoroutineBootstrapper<Action>() {
         override fun invoke() {
             scope.launch {
                 try {
                     dispatch(Action.ChangeTransactionsState(TransactionsState.Loading))
-                    val transactions = transactionsRepository.getTransactions()
-                    dispatch(Action.ChangeTransactionsState(TransactionsState.Content(transactions)))
+                    val transactions = transactionsRepository.getTransactionsByType(transactionType)
+                    val groupedMap = transactions.groupBy { it.date }
+                    val groupedByDateTransactions = groupedMap.map {
+                        State.GroupedByDateTransactions(
+                            dateLabel = it.key.toFullString(),
+                            transactions = it.value
+                        )
+                    }
+                    dispatch(
+                        Action.ChangeTransactionsState(
+                            TransactionsState.Content(
+                                groupedByDateTransactions
+                            )
+                        )
+                    )
                 } catch (e: Exception) {
                     dispatch(Action.ChangeTransactionsState(TransactionsState.Error(e.message ?: "Unknown message")))
                 }

@@ -1,5 +1,6 @@
 package com.robotbot.finance_tracker_client.transactions
 
+import com.robotbot.finance_tracker_client.categories.entities.CategoryType
 import com.robotbot.finance_tracker_client.transactions.entities.TransactionEntity
 import com.robotbot.finance_tracker_client.transactions.sources.RemoteTransactionsSource
 import com.robotbot.finance_tracker_client.transactions.sources.remote.dto.CreateTransactionRequest
@@ -11,6 +12,8 @@ interface TransactionsRepository {
     suspend fun getTransactions(): List<TransactionEntity>
 
     suspend fun getTransactionById(id: Long): TransactionEntity
+
+    suspend fun getTransactionsByType(transactionType: CategoryType): List<TransactionEntity>
 
     suspend fun addTransaction(createTransactionRequest: CreateTransactionRequest)
 
@@ -29,6 +32,10 @@ internal class RealTransactionsRepository @Inject constructor(
 
     override suspend fun getTransactionById(id: Long): TransactionEntity {
         return remoteSource.getTransactionById(id)
+    }
+
+    override suspend fun getTransactionsByType(transactionType: CategoryType): List<TransactionEntity> {
+        return remoteSource.getTransactionsByType(transactionType == CategoryType.EXPENSE)
     }
 
     override suspend fun addTransaction(createTransactionRequest: CreateTransactionRequest) {

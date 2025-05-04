@@ -2,6 +2,7 @@ package com.robotbot.finance_tracker_client.transactions.manage.presentation
 
 import com.arkivanov.decompose.ComponentContext
 import kotlinx.coroutines.flow.StateFlow
+import java.time.LocalDate
 
 interface ManageTransactionsComponent {
 
@@ -9,7 +10,7 @@ interface ManageTransactionsComponent {
 
     fun onChangeAmount(amountString: String)
 
-    fun onChangeTime(timeString: String)
+    fun onChangeDate(date: LocalDate)
 
     fun onCategoryClicked()
 

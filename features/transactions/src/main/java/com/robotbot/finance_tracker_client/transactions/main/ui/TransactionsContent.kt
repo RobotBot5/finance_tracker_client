@@ -42,10 +42,11 @@ import com.robotbot.finance_tracker_client.remote.util.BASE_URL
 import com.robotbot.finance_tracker_client.transactions.entities.TransactionEntity
 import com.robotbot.finance_tracker_client.transactions.main.presentation.TransactionsComponent
 import com.robotbot.finance_tracker_client.transactions.main.presentation.TransactionsStore
+import com.robotbot.finance_tracker_client.transactions.main.presentation.TransactionsStore.State.GroupedByDateTransactions
 import com.robotbot.finance_tracker_client.ui.coil.LocalCoilImageLoader
 import com.robotbot.finance_tracker_client.ui.theme.FinanceTrackerTheme
 import java.math.BigDecimal
-import java.time.OffsetDateTime
+import java.time.LocalDate
 
 @Composable
 fun TransactionsContent(component: TransactionsComponent, modifier: Modifier = Modifier) {
@@ -55,7 +56,7 @@ fun TransactionsContent(component: TransactionsComponent, modifier: Modifier = M
     when (val currentState = state.transactionsState) {
         is TransactionsStore.State.TransactionsState.Content -> {
             TransactionsList(
-                transactions = currentState.transactions,
+                groupedTransactions = currentState.transactions,
                 onTransactionClicked = component::onTransactionClicked,
                 onCreateTransactionClicked = component::onCreateTransactionClicked,
                 modifier = modifier
@@ -77,17 +78,32 @@ fun TransactionsContent(component: TransactionsComponent, modifier: Modifier = M
 
 @Composable
 private fun TransactionsList(
-    transactions: List<TransactionEntity>,
+    groupedTransactions: List<GroupedByDateTransactions>,
     onTransactionClicked: (Long) -> Unit,
     onCreateTransactionClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(modifier = modifier) {
-        items(
-            items = transactions,
-            key = { it.id }
-        ) { transaction ->
-            TransactionItem(transaction = transaction, onTransactionClicked = onTransactionClicked)
+        groupedTransactions.forEach { group ->
+            item {
+                Text(
+                    text = group.dateLabel,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                        .padding(8.dp)
+                )
+            }
+            items(
+                items = group.transactions,
+                key = { it.id }
+            ) { transaction ->
+                TransactionItem(
+                    transaction = transaction,
+                    onTransactionClicked = onTransactionClicked
+                )
+            }
         }
         item {
             Button(
@@ -162,7 +178,7 @@ private fun TransactionItemPreview() {
                 TransactionEntity(
                     id = 1,
                     amount = BigDecimal.valueOf(100L),
-                    time = OffsetDateTime.now(),
+                    date = LocalDate.now(),
                     category = CategoryEntity(
                         id = 1,
                         name = "Category",
@@ -192,31 +208,40 @@ private fun TransactionItemPreview() {
 @Preview(name = "light")
 @Composable
 private fun TransactionsListLight() {
-    val transactions = buildList {
-        repeat(10) {
+    val groupedTransactions = buildList {
+        repeat(3) {
             add(
-                TransactionEntity(
-                    id = it.toLong(),
-                    amount = BigDecimal.valueOf(it * 100L),
-                    time = OffsetDateTime.now(),
-                    category = CategoryEntity(
-                        id = it.toLong(),
-                        name = "Category: $it",
-                        type = CategoryType.EXPENSE,
-                        isSystem = false,
-                        icon = IconEntity(id = 1, name = "", path = "")
-                    ),
-                    account = AccountEntity(
-                        id = it.toLong(),
-                        name = "Account: $it",
-                        currency = CurrencyEntity(
-                            code = "USD",
-                            symbol = "$",
-                            name = "dollars"
-                        ),
-                        balance = BigDecimal.valueOf(it * 1000L),
-                        icon = IconEntity(id = 1, name = "", path = "")
-                    )
+                GroupedByDateTransactions(
+                    dateLabel = "${10 * (it + 1)} мая 2025",
+                    transactions = buildList {
+                        for (i in it * 3..(it * 3 + 2)) {
+                            add(
+                                TransactionEntity(
+                                    id = i.toLong(),
+                                    amount = BigDecimal.valueOf(i * 100L),
+                                    date = LocalDate.now(),
+                                    category = CategoryEntity(
+                                        id = i.toLong(),
+                                        name = "Category: $i",
+                                        type = CategoryType.EXPENSE,
+                                        isSystem = false,
+                                        icon = IconEntity(id = 1, name = "", path = "")
+                                    ),
+                                    account = AccountEntity(
+                                        id = i.toLong(),
+                                        name = "Account: $i",
+                                        currency = CurrencyEntity(
+                                            code = "USD",
+                                            symbol = "$",
+                                            name = "dollars"
+                                        ),
+                                        balance = BigDecimal.valueOf(i * 1000L),
+                                        icon = IconEntity(id = 1, name = "", path = "")
+                                    )
+                                )
+                            )
+                        }
+                    }
                 )
             )
         }
@@ -225,7 +250,7 @@ private fun TransactionsListLight() {
     FinanceTrackerTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
             TransactionsList(
-                transactions = transactions,
+                groupedTransactions = groupedTransactions,
                 onTransactionClicked = {},
                 onCreateTransactionClicked = {}
             )
@@ -237,31 +262,40 @@ private fun TransactionsListLight() {
 @Preview(name = "dark")
 @Composable
 private fun TransactionsListDark() {
-    val transactions = buildList {
-        repeat(10) {
+    val groupedTransactions = buildList {
+        repeat(3) {
             add(
-                TransactionEntity(
-                    id = it.toLong(),
-                    amount = BigDecimal.valueOf(it * 100L),
-                    time = OffsetDateTime.now(),
-                    category = CategoryEntity(
-                        id = it.toLong(),
-                        name = "Category: $it",
-                        type = CategoryType.EXPENSE,
-                        isSystem = false,
-                        icon = IconEntity(id = 1, name = "", path = "")
-                    ),
-                    account = AccountEntity(
-                        id = it.toLong(),
-                        name = "Account: $it",
-                        currency = CurrencyEntity(
-                            code = "USD",
-                            symbol = "$",
-                            name = "dollars"
-                        ),
-                        balance = BigDecimal.valueOf(it * 1000L),
-                        icon = IconEntity(id = 1, name = "", path = "")
-                    )
+                GroupedByDateTransactions(
+                    dateLabel = "${10 * (it + 1)} мая 2025",
+                    transactions = buildList {
+                        for (i in it * 3..(it * 3 + 2)) {
+                            add(
+                                TransactionEntity(
+                                    id = i.toLong(),
+                                    amount = BigDecimal.valueOf(i * 100L),
+                                    date = LocalDate.now(),
+                                    category = CategoryEntity(
+                                        id = i.toLong(),
+                                        name = "Category: $i",
+                                        type = CategoryType.EXPENSE,
+                                        isSystem = false,
+                                        icon = IconEntity(id = 1, name = "", path = "")
+                                    ),
+                                    account = AccountEntity(
+                                        id = i.toLong(),
+                                        name = "Account: $i",
+                                        currency = CurrencyEntity(
+                                            code = "USD",
+                                            symbol = "$",
+                                            name = "dollars"
+                                        ),
+                                        balance = BigDecimal.valueOf(i * 1000L),
+                                        icon = IconEntity(id = 1, name = "", path = "")
+                                    )
+                                )
+                            )
+                        }
+                    }
                 )
             )
         }
@@ -270,7 +304,7 @@ private fun TransactionsListDark() {
     FinanceTrackerTheme(darkTheme = true) {
         Surface(modifier = Modifier.fillMaxSize()) {
             TransactionsList(
-                transactions = transactions,
+                groupedTransactions = groupedTransactions,
                 onTransactionClicked = {},
                 onCreateTransactionClicked = {}
             )

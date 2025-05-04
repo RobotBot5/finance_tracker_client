@@ -4,6 +4,7 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.arkivanov.mvikotlin.extensions.coroutines.stateFlow
+import com.robotbot.finance_tracker_client.categories.entities.CategoryType
 import com.robotbot.finance_tracker_client.dependencies.util.componentScope
 import com.robotbot.finance_tracker_client.transactions.main.presentation.TransactionsStore.Intent
 import com.robotbot.finance_tracker_client.transactions.main.presentation.TransactionsStore.Label
@@ -16,11 +17,12 @@ import kotlinx.coroutines.launch
 
 internal class DefaultTransactionsComponent @AssistedInject constructor(
     private val transactionsStoreFactory: TransactionsStoreFactory,
+    @Assisted("transactionType") private val transactionType: CategoryType,
     @Assisted("onCreateTransactionNavigate") private val onCreateTransactionNavigate: (editableTransactionId: Long?) -> Unit,
     @Assisted componentContext: ComponentContext
 ) : TransactionsComponent, ComponentContext by componentContext {
 
-    private val store = instanceKeeper.getStore { transactionsStoreFactory.create() }
+    private val store = instanceKeeper.getStore { transactionsStoreFactory.create(transactionType) }
     private val scope = componentScope()
 
     init {
@@ -47,6 +49,7 @@ internal class DefaultTransactionsComponent @AssistedInject constructor(
     @AssistedFactory
     interface Factory : TransactionsComponent.Factory {
         override fun invoke(
+            @Assisted("transactionType") transactionType: CategoryType,
             @Assisted("onCreateTransactionNavigate") onCreateTransactionNavigate: (editableTransactionId: Long?) -> Unit,
             @Assisted componentContext: ComponentContext
         ): DefaultTransactionsComponent

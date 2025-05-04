@@ -42,8 +42,8 @@ import com.robotbot.finance_tracker_client.root.RootComponent.Child.ManageCatego
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.ManageTransactions
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.Transactions
 import com.robotbot.finance_tracker_client.transactions.category_choose.ui.ChooseCategoryContent
-import com.robotbot.finance_tracker_client.transactions.main.ui.TransactionsContent
 import com.robotbot.finance_tracker_client.transactions.manage.ui.ManageTransactionsContent
+import com.robotbot.finance_tracker_client.transactions.root.RootTransactionsContent
 import com.robotbot.finance_tracker_client.ui.theme.FinanceTrackerTheme
 
 @Composable
@@ -115,9 +115,10 @@ fun RootContent(component: RootComponent, modifier: Modifier = Modifier) {
                     is CreateTransfer -> CreateTransferContent(component = child.component, modifier = Modifier
                         .fillMaxWidth()
                         .padding(paddings))
-                    is Transactions -> TransactionsContent(component = child.component, modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(paddings))
+                    is Transactions -> RootTransactionsContent(
+                        component = child.component, modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(paddings))
                     is ChooseCategory -> ChooseCategoryContent(component = child.component, modifier = Modifier
                         .fillMaxWidth()
                         .padding(paddings))

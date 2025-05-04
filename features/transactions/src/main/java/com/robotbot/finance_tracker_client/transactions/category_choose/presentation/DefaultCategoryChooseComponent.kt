@@ -4,6 +4,7 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.arkivanov.mvikotlin.extensions.coroutines.stateFlow
+import com.robotbot.finance_tracker_client.categories.entities.CategoryType
 import com.robotbot.finance_tracker_client.dependencies.util.componentScope
 import com.robotbot.finance_tracker_client.transactions.category_choose.presentation.CategoryChooseStore.Intent
 import com.robotbot.finance_tracker_client.transactions.category_choose.presentation.CategoryChooseStore.Label
@@ -41,6 +42,10 @@ internal class DefaultCategoryChooseComponent @AssistedInject constructor(
 
     override fun onCategoryClicked(categoryId: Long) {
         store.accept(Intent.SelectCategory(categoryId))
+    }
+
+    override fun onChangeCategoryType(categoryType: CategoryType) {
+        store.accept(Intent.ChangeCategoryType(categoryType))
     }
 
     @AssistedFactory

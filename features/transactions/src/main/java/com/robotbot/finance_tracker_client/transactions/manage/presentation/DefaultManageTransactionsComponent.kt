@@ -12,6 +12,7 @@ import dagger.assisted.AssistedInject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 internal class DefaultManageTransactionsComponent @AssistedInject constructor(
     private val manageTransactionsStoreFactory: ManageTransactionsStoreFactory,
@@ -44,8 +45,8 @@ internal class DefaultManageTransactionsComponent @AssistedInject constructor(
         store.accept(Intent.ChangeAmount(amountString))
     }
 
-    override fun onChangeTime(timeString: String) {
-        store.accept(Intent.ChangeTime(timeString))
+    override fun onChangeDate(date: LocalDate) {
+        store.accept(Intent.ChangeDate(date))
     }
 
     override fun onCategoryClicked() {

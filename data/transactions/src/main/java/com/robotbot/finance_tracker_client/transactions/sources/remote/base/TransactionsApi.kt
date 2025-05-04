@@ -10,11 +10,15 @@ import retrofit2.http.GET
 import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 internal interface TransactionsApi {
 
-    @GET("transactions")
+    @GET("transactions?sortOrder=desc")
     suspend fun getTransactions(): TransactionsListResponse
+
+    @GET("transactions?sortOrder=desc")
+    suspend fun getTransactionsByType(@Query("isExpense") isExpense: Boolean): TransactionsListResponse
 
     @POST("transactions")
     suspend fun addTransaction(@Body createTransactionRequest: CreateTransactionRequest)

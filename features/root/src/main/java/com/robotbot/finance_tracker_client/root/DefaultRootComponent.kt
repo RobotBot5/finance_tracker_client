@@ -31,8 +31,8 @@ import com.robotbot.finance_tracker_client.root.RootComponent.Child.ManageCatego
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.ManageTransactions
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.Transactions
 import com.robotbot.finance_tracker_client.transactions.category_choose.presentation.CategoryChooseComponent
-import com.robotbot.finance_tracker_client.transactions.main.presentation.TransactionsComponent
 import com.robotbot.finance_tracker_client.transactions.manage.presentation.ManageTransactionsComponent
+import com.robotbot.finance_tracker_client.transactions.root.RootTransactionsComponent
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -48,7 +48,7 @@ internal class DefaultRootComponent @AssistedInject constructor(
     private val rootCategoriesComponentFactory: RootCategoriesComponent.Factory,
     private val createTransferComponentFactory: CreateTransferComponent.Factory,
     private val chooseAccountComponentFactory: ChooseAccountComponent.Factory,
-    private val transactionsComponentFactory: TransactionsComponent.Factory,
+    private val rootTransactionsComponentFactory: RootTransactionsComponent.Factory,
     private val manageTransactionsComponentFactory: ManageTransactionsComponent.Factory,
     private val chooseCategoryComponentFactory: CategoryChooseComponent.Factory,
     @Assisted componentContext: ComponentContext
@@ -112,7 +112,7 @@ internal class DefaultRootComponent @AssistedInject constructor(
             Config.CreateTransfer -> CreateTransfer(
                 createTransferComponent(childComponentContext)
             )
-            Config.Transactions -> Transactions(transactionsComponent(childComponentContext))
+            Config.Transactions -> Transactions(rootTransactionsComponent(childComponentContext))
             is Config.ChooseCategory -> ChooseCategory(
                 chooseCategoryComponent(config.yetSelectedCategoryId, childComponentContext)
             )
@@ -246,8 +246,8 @@ internal class DefaultRootComponent @AssistedInject constructor(
             componentContext = componentContext
         )
 
-    private fun transactionsComponent(componentContext: ComponentContext): TransactionsComponent =
-        transactionsComponentFactory(
+    private fun rootTransactionsComponent(componentContext: ComponentContext): RootTransactionsComponent =
+        rootTransactionsComponentFactory(
             onCreateTransactionNavigate = { navigation.pushNew(Config.ManageTransactions(it)) },
             componentContext = componentContext
         )
