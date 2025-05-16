@@ -9,7 +9,9 @@ import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.pushNew
 import com.arkivanov.decompose.router.stack.replaceAll
 import com.arkivanov.decompose.value.Value
+import com.robotbot.finance_tracker_client.analytics.presentation.AnalyticsComponent
 import com.robotbot.finance_tracker_client.authorize.presentation.AuthorizeComponent
+import com.robotbot.finance_tracker_client.authorize.register.presentation.RegisterComponent
 import com.robotbot.finance_tracker_client.bank_accounts.presentation.AccountsComponent
 import com.robotbot.finance_tracker_client.categories.main.RootCategoriesComponent
 import com.robotbot.finance_tracker_client.create_transfer.ChangingAccountQualifier
@@ -21,6 +23,7 @@ import com.robotbot.finance_tracker_client.manage_accounts.presentation.ManageAc
 import com.robotbot.finance_tracker_client.manage_categories.presentation.ManageCategoriesComponent
 import com.robotbot.finance_tracker_client.root.RootComponent.Child
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.Accounts
+import com.robotbot.finance_tracker_client.root.RootComponent.Child.Analytics
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.Categories
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.ChooseAccount
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.ChooseCategory
@@ -29,6 +32,7 @@ import com.robotbot.finance_tracker_client.root.RootComponent.Child.CurrencyChoo
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.ManageAccounts
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.ManageCategories
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.ManageTransactions
+import com.robotbot.finance_tracker_client.root.RootComponent.Child.Register
 import com.robotbot.finance_tracker_client.root.RootComponent.Child.Transactions
 import com.robotbot.finance_tracker_client.transactions.category_choose.presentation.CategoryChooseComponent
 import com.robotbot.finance_tracker_client.transactions.manage.presentation.ManageTransactionsComponent
@@ -40,6 +44,7 @@ import kotlinx.serialization.Serializable
 
 internal class DefaultRootComponent @AssistedInject constructor(
     private val authorizeComponentFactory: AuthorizeComponent.Factory,
+    private val registerComponentFactory: RegisterComponent.Factory,
     private val accountsComponentFactory: AccountsComponent.Factory,
     private val manageAccountsComponentFactory: ManageAccountsComponent.Factory,
     private val currenciesComponentFactory: CurrenciesComponent.Factory,
@@ -51,6 +56,7 @@ internal class DefaultRootComponent @AssistedInject constructor(
     private val rootTransactionsComponentFactory: RootTransactionsComponent.Factory,
     private val manageTransactionsComponentFactory: ManageTransactionsComponent.Factory,
     private val chooseCategoryComponentFactory: CategoryChooseComponent.Factory,
+    private val analyticsComponentFactory: AnalyticsComponent.Factory,
     @Assisted componentContext: ComponentContext
 ) : RootComponent, ComponentContext by componentContext {
 
@@ -70,6 +76,7 @@ internal class DefaultRootComponent @AssistedInject constructor(
             MainNavTab.Accounts -> navigation.replaceAll(Config.Accounts)
             MainNavTab.Categories -> navigation.replaceAll(Config.Categories)
             MainNavTab.Transactions -> navigation.replaceAll(Config.Transactions)
+            MainNavTab.Analytics -> navigation.replaceAll(Config.Analytics)
         }
     }
 
@@ -119,11 +126,24 @@ internal class DefaultRootComponent @AssistedInject constructor(
             is Config.ManageTransactions -> ManageTransactions(
                 manageTransactionsComponent(config.editableTransactionId, childComponentContext)
             )
+            Config.Analytics -> Analytics(
+                analyticsComponent(childComponentContext)
+            )
+            Config.Register -> Register(
+                registerComponent(childComponentContext)
+            )
         }
+
+    private fun registerComponent(componentContext: ComponentContext): RegisterComponent =
+        registerComponentFactory(
+            onRegisterSuccess = { navigation.pop() },
+            componentContext = componentContext
+        )
 
     private fun authorizeComponent(componentContext: ComponentContext): AuthorizeComponent =
         authorizeComponentFactory(
             onAuthSuccess = { navigation.pop() },
+            onRegister = { navigation.pushNew(Config.Register) },
             componentContext = componentContext
         )
 
@@ -277,12 +297,19 @@ internal class DefaultRootComponent @AssistedInject constructor(
             componentContext = componentContext
         )
 
+    private fun analyticsComponent(
+        componentContext: ComponentContext
+    ): AnalyticsComponent = analyticsComponentFactory(componentContext = componentContext)
+
 
     @Serializable
     private sealed interface Config {
 
         @Serializable
         data object Authorize : Config
+
+        @Serializable
+        data object Register : Config
 
         @Serializable
         data object Accounts : Config
@@ -319,6 +346,9 @@ internal class DefaultRootComponent @AssistedInject constructor(
 
         @Serializable
         data class ChooseCategory(val yetSelectedCategoryId: Long?) : Config
+
+        @Serializable
+        data object Analytics : Config
     }
 
     @AssistedFactory

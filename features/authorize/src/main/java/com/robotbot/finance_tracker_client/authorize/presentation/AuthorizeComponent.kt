@@ -16,6 +16,8 @@ interface AuthorizeComponent {
 
     fun onChangePassword(password: String)
 
+    fun onRegisterClicked()
+
     sealed interface Events {
         data class AuthError(val msg: String) : Events
 
@@ -24,6 +26,7 @@ interface AuthorizeComponent {
     fun interface Factory {
         operator fun invoke(
             onAuthSuccess: () -> Unit,
+            onRegister: () -> Unit,
             componentContext: ComponentContext
         ): AuthorizeComponent
     }

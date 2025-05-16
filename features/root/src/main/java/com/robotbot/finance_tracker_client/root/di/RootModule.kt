@@ -1,4 +1,5 @@
 package com.robotbot.finance_tracker_client.root.di
+import com.robotbot.finance_tracker_client.analytics.di.AnalyticsFeatureModule
 import com.robotbot.finance_tracker_client.authorize.di.AuthorizeFeatureModule
 import com.robotbot.finance_tracker_client.bank_accounts.di.AccountsFeatureModule
 import com.robotbot.finance_tracker_client.categories.di.CategoriesFeatureModule
@@ -20,6 +21,7 @@ import dagger.Module
     ManageCategoriesFeatureModule::class,
     CreateTransferFeatureModule::class,
     TransactionsFeatureModule::class,
+    AnalyticsFeatureModule::class,
     ComponentFactoryModule::class
 ])
 interface RootModule

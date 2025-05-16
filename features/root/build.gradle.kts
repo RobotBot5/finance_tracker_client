@@ -64,5 +64,6 @@ dependencies {
     implementation(project(":features:manage_categories"))
     implementation(project(":features:create_transfer"))
     implementation(project(":features:transactions"))
+    implementation(project(":features:analytics"))
     implementation(project(":core:ui"))
 }

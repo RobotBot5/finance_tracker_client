@@ -22,6 +22,8 @@ interface AuthorizeStore : Store<Intent, State, Label> {
         data class ChangePassword(val password: String) : Intent
 
         data object ClickSignIn : Intent
+
+        data object OnRegisterClicked : Intent
     }
 
     data class State(
@@ -42,6 +44,8 @@ interface AuthorizeStore : Store<Intent, State, Label> {
         data class ErrorMsg(val errorMsg: String) : Label
 
         data object AuthSuccess : Label
+
+        data object OnRegisterNavigate : Label
     }
 }
 
@@ -100,6 +104,7 @@ internal class AuthorizeStoreFactory @Inject constructor(
                         }
                     }
                 }
+                is Intent.OnRegisterClicked -> publish(Label.OnRegisterNavigate)
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.robotbot.finance_tracker_client.authorize.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -84,6 +85,10 @@ fun AuthorizeContent(component: AuthorizeComponent, modifier: Modifier = Modifie
             ) {
                 Text(text = "Sign in")
             }
+            Text(
+                modifier = Modifier.clickable { component.onRegisterClicked() },
+                text = "Register"
+            )
         }
     }
 }

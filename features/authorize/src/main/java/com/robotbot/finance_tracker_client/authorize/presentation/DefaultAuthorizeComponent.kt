@@ -20,6 +20,7 @@ import kotlinx.coroutines.launch
 internal class DefaultAuthorizeComponent @AssistedInject constructor(
     private val storeFactory: AuthorizeStoreFactory,
     @Assisted("onAuthSuccess") private val onAuthSuccess: () -> Unit,
+    @Assisted("onRegister") private val onRegister: () -> Unit,
     @Assisted private val componentContext: ComponentContext
 ) : AuthorizeComponent, ComponentContext by componentContext {
 
@@ -36,6 +37,7 @@ internal class DefaultAuthorizeComponent @AssistedInject constructor(
                     is AuthorizeStore.Label.ErrorMsg -> {
                         _events.emit(AuthorizeComponent.Events.AuthError(it.errorMsg))
                     }
+                    AuthorizeStore.Label.OnRegisterNavigate -> onRegister()
                 }
             }
         }
@@ -60,11 +62,15 @@ internal class DefaultAuthorizeComponent @AssistedInject constructor(
         store.accept(Intent.ChangePassword(password))
     }
 
+    override fun onRegisterClicked() {
+        store.accept(Intent.OnRegisterClicked)
+    }
 
     @AssistedFactory
     interface Factory : AuthorizeComponent.Factory {
         override fun invoke(
             @Assisted("onAuthSuccess") onAuthSuccess: () -> Unit,
+            @Assisted("onRegister") onRegister: () -> Unit,
             componentContext: ComponentContext
         ): DefaultAuthorizeComponent
     }
