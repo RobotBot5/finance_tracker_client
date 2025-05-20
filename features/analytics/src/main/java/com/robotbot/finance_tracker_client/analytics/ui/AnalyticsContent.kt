@@ -223,7 +223,6 @@ val myPalette = listOf(
     Color.Magenta, // Purple
     Color.Blue, // Blue
     Color.Cyan, // Teal
-    Color.Yellow, // Amber
     Color.Green, // Brown
     Color.Gray  // Blue Grey
 )

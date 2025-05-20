@@ -35,8 +35,8 @@ interface ManageAccountsComponent {
         operator fun invoke(
             editableAccountEntityId: Long?,
             onWorkFinished: () -> Unit,
-            onChangeCurrency: (String) -> Unit,
-            onChangeIcon: (Long) -> Unit,
+            onChangeCurrency: (String?) -> Unit,
+            onChangeIcon: (Long?) -> Unit,
             componentContext: ComponentContext
         ): ManageAccountsComponent
     }

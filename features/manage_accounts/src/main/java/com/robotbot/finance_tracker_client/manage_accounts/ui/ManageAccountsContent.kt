@@ -12,21 +12,31 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.ImageLoader
@@ -39,23 +49,38 @@ import com.robotbot.finance_tracker_client.manage_accounts.presentation.OpenReas
 import com.robotbot.finance_tracker_client.remote.util.BASE_URL
 import com.robotbot.finance_tracker_client.ui.coil.LocalCoilImageLoader
 import com.robotbot.finance_tracker_client.ui.theme.FinanceTrackerTheme
-import java.math.BigDecimal
 
 @Composable
 fun ManageAccountsContent(component: ManageAccountsComponent, modifier: Modifier = Modifier) {
 
     val state by component.model.collectAsState()
+    val snackBarHostState = remember { SnackbarHostState() }
 
-    ManageAccounts(
-        state = state,
-        onAccountTitleChange = component::onChangeAccountTitle,
-        onBalanceChange = component::onChangeBalance,
-        onCreateAccountClicked = component::onClickCreateAccount,
-        onChangeCurrencyClicked = component::onChangeCurrency,
-        onIconClicked = component::onIconClicked,
-        onDeleteAccountClicked = component::onDeleteClicked,
-        modifier = modifier
-    )
+    LaunchedEffect(Unit) {
+        component.events.collect {
+            when (it) {
+                is ManageAccountsComponent.Events.CreateAccountError ->
+                    snackBarHostState.showSnackbar(it.msg)
+            }
+        }
+    }
+
+    Scaffold(
+        modifier = modifier,
+        snackbarHost = { SnackbarHost(snackBarHostState) }
+    ) { paddings ->
+        ManageAccounts(
+            state = state,
+            onAccountTitleChange = component::onChangeAccountTitle,
+            onBalanceChange = component::onChangeBalance,
+            onCreateAccountClicked = component::onClickCreateAccount,
+            onChangeCurrencyClicked = component::onChangeCurrency,
+            onIconClicked = component::onIconClicked,
+            onDeleteAccountClicked = component::onDeleteClicked,
+            modifier = Modifier.padding(paddings)
+        )
+    }
+
 }
 
 @Composable
@@ -77,8 +102,7 @@ private fun ManageAccounts(
     }
 
     Column(
-        modifier = modifier
-            .fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -91,6 +115,7 @@ private fun ManageAccounts(
         )
         Spacer(modifier = Modifier.height(8.dp))
         TextField(
+            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Decimal),
             value = state.balance.toString(),
             onValueChange = onBalanceChange,
             label = {
@@ -104,19 +129,32 @@ private fun ManageAccounts(
         ) {
             Text(
                 modifier = Modifier.clickable { onChangeCurrencyClicked() },
-                text = "Currency: ${state.selectedCurrency.name}",
+                text = state.selectedCurrency?.name?.let { name ->
+                    "Currency: $name"
+                } ?: "Choose currency",
                 style = MaterialTheme.typography.labelLarge
             )
-            AsyncImage(
+            state.selectedIconEntity?.path?.let { path ->
+                AsyncImage(
+                    modifier = Modifier
+                        .size(52.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.secondaryContainer)
+                        .padding(8.dp)
+                        .clickable { onIconClicked() },
+                    model = BASE_URL.dropLast(1) + state.selectedIconEntity.path,
+                    imageLoader = imageLoader,
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSecondary),
+                    contentDescription = null
+                )
+            } ?: Icon(
                 modifier = Modifier
                     .size(52.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.secondaryContainer)
                     .padding(8.dp)
                     .clickable { onIconClicked() },
-                model = BASE_URL.dropLast(1) + state.selectedIconEntity.path,
-                imageLoader = imageLoader,
-                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSecondary),
+                imageVector = Icons.Default.Clear,
                 contentDescription = null
             )
         }
@@ -159,16 +197,12 @@ private fun ManageAccountsPreviewLight() {
             ManageAccounts(
                 state = ManageAccountsStore.State(
                     accountTitle = "",
-                    balance = BigDecimal.ZERO,
+                    balance = "",
                     isLoading = false,
-                    selectedCurrency = CurrencyEntity(code = "USD", symbol = "$", name = "dollars"),
+                    selectedCurrency = null,
                     openReason = EDIT,
                     editableAccountId = null,
-                    selectedIconEntity = IconEntity(
-                        id = 1,
-                        name = "dasd",
-                        path = "asdsad"
-                    )
+                    selectedIconEntity = null
                 ),
                 onBalanceChange = {},
                 onAccountTitleChange = {},
@@ -189,7 +223,7 @@ private fun ManageAccountsPreviewDark() {
             ManageAccounts(
                 state = ManageAccountsStore.State(
                     accountTitle = "",
-                    balance = BigDecimal.ZERO,
+                    balance = "",
                     isLoading = false,
                     selectedCurrency = CurrencyEntity(code = "USD", symbol = "$", name = "dollars"),
                     openReason = EDIT,

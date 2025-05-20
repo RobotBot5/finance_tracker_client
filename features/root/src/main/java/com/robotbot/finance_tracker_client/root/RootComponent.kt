@@ -3,7 +3,7 @@ package com.robotbot.finance_tracker_client.root
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.value.Value
-import com.robotbot.finance_tracker_client.analytics.presentation.AnalyticsComponent
+import com.robotbot.finance_tracker_client.analytics.root.RootAnalyticsComponent
 import com.robotbot.finance_tracker_client.authorize.presentation.AuthorizeComponent
 import com.robotbot.finance_tracker_client.authorize.register.presentation.RegisterComponent
 import com.robotbot.finance_tracker_client.bank_accounts.presentation.AccountsComponent
@@ -14,6 +14,7 @@ import com.robotbot.finance_tracker_client.currency_choose.presentation.Currenci
 import com.robotbot.finance_tracker_client.icon_choose.presentation.ChooseIconComponent
 import com.robotbot.finance_tracker_client.manage_accounts.presentation.ManageAccountsComponent
 import com.robotbot.finance_tracker_client.manage_categories.presentation.ManageCategoriesComponent
+import com.robotbot.finance_tracker_client.profile.presentation.ProfileComponent
 import com.robotbot.finance_tracker_client.transactions.category_choose.presentation.CategoryChooseComponent
 import com.robotbot.finance_tracker_client.transactions.manage.presentation.ManageTransactionsComponent
 import com.robotbot.finance_tracker_client.transactions.root.RootTransactionsComponent
@@ -29,6 +30,8 @@ interface RootComponent {
         data class Authorize(val component: AuthorizeComponent) : Child
 
         data class Register(val component: RegisterComponent) : Child
+
+        data class Profile(val component: ProfileComponent) : Child
 
         data class Accounts(val component: AccountsComponent) : Child
 
@@ -52,7 +55,7 @@ interface RootComponent {
 
         data class ChooseCategory(val component: CategoryChooseComponent) : Child
 
-        data class Analytics(val component: AnalyticsComponent) : Child
+        data class Analytics(val component: RootAnalyticsComponent) : Child
     }
 
     fun interface Factory {

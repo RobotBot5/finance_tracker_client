@@ -17,6 +17,7 @@ import com.robotbot.finance_tracker_client.manage_categories.presentation.Manage
 import com.robotbot.finance_tracker_client.manage_categories.presentation.ManageCategoriesStore.State
 import com.robotbot.finance_tracker_client.manage_categories.presentation.OpenReason.CREATE
 import com.robotbot.finance_tracker_client.manage_categories.presentation.OpenReason.EDIT
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -35,16 +36,24 @@ interface ManageCategoriesStore : Store<Intent, State, Label> {
         data object ClickSave : Intent
 
         data object ClickDelete : Intent
+
+        data object Reload : Intent
     }
 
-    data class State(
-        val categoryName: String,
-        val selectedIconEntity: IconEntity,
-        val categoryType: CategoryType,
-        val openReason: OpenReason,
-        val editableCategoryId: Long?,
-        val isLoading: Boolean
-    )
+    sealed interface State {
+
+        data object Loading : State
+
+        data object Error : State
+
+        data class Content(
+            val categoryName: String,
+            val selectedIconEntity: IconEntity?,
+            val categoryType: CategoryType,
+            val buttonLoading: Boolean,
+            val openReason: OpenReason
+        ) : State
+    }
 
     sealed interface Label {
 
@@ -52,7 +61,7 @@ interface ManageCategoriesStore : Store<Intent, State, Label> {
 
         data class ErrorMsg(val errorMsg: String) : Label
 
-        data class ChooseIcon(val yetSelectedIconId: Long) : Label
+        data class ChooseIcon(val yetSelectedIconId: Long?) : Label
     }
 }
 
@@ -62,46 +71,69 @@ internal class ManageCategoriesStoreFactory @Inject constructor(
     private val getInfoRepository: GetInfoRepository
 ) {
 
-    fun create(editableCategoryId: Long?): ManageCategoriesStore =
-        object : ManageCategoriesStore, Store<Intent, State, Label> by storeFactory.create(
+    private var editableCategoryLoadingJob: Job? = null
+
+    private var editableCategoryId: Long? = null
+
+    private val openReason: OpenReason
+        get() = if (editableCategoryId == null) CREATE else EDIT
+
+    fun create(editableCategoryId: Long?): ManageCategoriesStore {
+        this.editableCategoryId = editableCategoryId
+        return object : ManageCategoriesStore, Store<Intent, State, Label> by storeFactory.create(
             name = "ManageCategoriesStore",
-            initialState = State(
+            initialState = State.Content(
                 categoryName = "",
-                selectedIconEntity = IconEntity(id = 1, name = "dasd", path = "/icons/account_card_24dp.svg"),
-                openReason = if (editableCategoryId == null) CREATE else EDIT,
-                editableCategoryId = editableCategoryId,
-                isLoading = true,
-                categoryType = CategoryType.EXPENSE
+                selectedIconEntity = null,
+                categoryType = CategoryType.INCOME,
+                buttonLoading = false,
+                openReason = openReason
             ),
             bootstrapper = BootstrapperImpl(editableCategoryId),
             executorFactory = ::ExecutorImpl,
             reducer = ReducerImpl
         ) {}
+    }
 
     private sealed interface Action {
+
+        data object StartLoading : Action
+
+        data object Error : Action
 
         data class EditableCategoryLoaded(val category: CategoryEntity) : Action
     }
 
     private sealed interface Msg {
 
+        data object StartLoading : Msg
+
+        data object Error : Msg
+
         data class ChangeCategoryName(val name: String) : Msg
 
         data class ChangeCategoryType(val categoryType: CategoryType) : Msg
 
-        data class ChangeLoading(val isLoading: Boolean) : Msg
+        data class ChangeButtonLoading(val isLoading: Boolean) : Msg
 
         data class ChangeSelectedIcon(val icon: IconEntity) : Msg
 
         data class EditableCategoryLoaded(val category: CategoryEntity) : Msg
     }
 
-    private inner class BootstrapperImpl(private val editableCategoryId: Long?) : CoroutineBootstrapper<Action>() {
+    private inner class BootstrapperImpl(private val editableCategoryId: Long?) :
+        CoroutineBootstrapper<Action>() {
         override fun invoke() {
             editableCategoryId?.let {
-                scope.launch {
-                    val editableCategory = categoriesRepository.getCategoryById(editableCategoryId)
-                    dispatch(Action.EditableCategoryLoaded(editableCategory))
+                dispatch(Action.StartLoading)
+                editableCategoryLoadingJob = scope.launch {
+                    try {
+                        val editableCategory =
+                            categoriesRepository.getCategoryById(editableCategoryId)
+                        dispatch(Action.EditableCategoryLoaded(editableCategory))
+                    } catch (e: Exception) {
+                        dispatch(Action.Error)
+                    }
                 }
             }
         }
@@ -111,75 +143,115 @@ internal class ManageCategoriesStoreFactory @Inject constructor(
         override fun executeAction(action: Action) {
             when (action) {
                 is Action.EditableCategoryLoaded -> dispatch(Msg.EditableCategoryLoaded(action.category))
+                Action.Error -> dispatch(Msg.Error)
+                Action.StartLoading -> dispatch(Msg.StartLoading)
             }
         }
 
         override fun executeIntent(intent: Intent) {
             when (intent) {
+                Intent.Reload -> {
+                    editableCategoryLoadingJob?.cancel()
+                    val editableCategoryId = editableCategoryId ?: return
+                    dispatch(Msg.StartLoading)
+                    editableCategoryLoadingJob = scope.launch {
+                        try {
+                            val editableCategory =
+                                categoriesRepository.getCategoryById(editableCategoryId)
+                            dispatch(Msg.EditableCategoryLoaded(editableCategory))
+                        } catch (e: Exception) {
+                            dispatch(Msg.Error)
+                        }
+                    }
+                }
+
                 is Intent.ChangeCategoryName -> {
                     dispatch(Msg.ChangeCategoryName(intent.name))
                 }
+
                 is Intent.ChangeCategoryType -> {
                     dispatch(Msg.ChangeCategoryType(intent.categoryType))
                 }
+
                 Intent.ClickSave -> {
-                    val currentState = state()
-                    if (currentState.openReason == CREATE) {
+                    val currentState = (state() as? State.Content) ?: return
+                    val selectedIconId = currentState.selectedIconEntity?.id ?: run {
+                        publish(Label.ErrorMsg("Please select icon"))
+                        return
+                    }
+                    if (currentState.categoryName.isEmpty()) {
+                        publish(Label.ErrorMsg("Please enter category name"))
+                        return
+                    }
+                    if (openReason == CREATE) {
                         val categoryCreateRequest = CategoryCreateRequest(
                             name = currentState.categoryName,
                             isExpense = currentState.categoryType == CategoryType.EXPENSE,
-                            iconId = currentState.selectedIconEntity.id
+                            iconId = selectedIconId
                         )
                         scope.launch {
                             try {
-                                dispatch(Msg.ChangeLoading(true))
+                                dispatch(Msg.ChangeButtonLoading(true))
                                 categoriesRepository.createCategory(categoryCreateRequest)
                                 publish(Label.WorkFinished)
                             } catch (e: Exception) {
                                 publish(Label.ErrorMsg(e.message ?: "Unknown error"))
                             } finally {
-                                dispatch(Msg.ChangeLoading(false))
+                                dispatch(Msg.ChangeButtonLoading(false))
                             }
                         }
-                    } else if (currentState.openReason == EDIT) {
+                    } else if (openReason == EDIT) {
                         val categoryUpdateRequest = CategoryUpdateRequest(
                             name = currentState.categoryName,
-                            iconId = currentState.selectedIconEntity.id
+                            iconId = selectedIconId
                         )
+                        dispatch(Msg.ChangeButtonLoading(true))
                         scope.launch {
                             try {
-                                dispatch(Msg.ChangeLoading(true))
-                                currentState.editableCategoryId?.let {
+                                editableCategoryId?.let {
                                     categoriesRepository.updateCategory(it, categoryUpdateRequest)
                                 }
                                 publish(Label.WorkFinished)
                             } catch (e: Exception) {
                                 publish(Label.ErrorMsg(e.message ?: "Unknown error"))
                             } finally {
-                                dispatch(Msg.ChangeLoading(false))
+                                dispatch(Msg.ChangeButtonLoading(false))
                             }
                         }
                     }
                 }
+
                 is Intent.ChangeSelectedIcon -> {
+                    dispatch(Msg.ChangeButtonLoading(true))
                     scope.launch {
-                        val iconEntity = getInfoRepository.getIconById(intent.iconId)
-                        dispatch(Msg.ChangeSelectedIcon(iconEntity))
+                        try {
+                            val iconEntity = getInfoRepository.getIconById(intent.iconId)
+                            dispatch(Msg.ChangeSelectedIcon(iconEntity))
+                        } catch (e: Exception) {
+                            publish(Label.ErrorMsg(e.message ?: "Unknown error"))
+                        } finally {
+                            dispatch(Msg.ChangeButtonLoading(false))
+                        }
                     }
                 }
-                Intent.IconClicked -> publish(Label.ChooseIcon(state().selectedIconEntity.id))
+
+                Intent.IconClicked -> {
+                    val selectedIconId = (state() as? State.Content)?.selectedIconEntity?.id
+                    publish(Label.ChooseIcon(selectedIconId))
+                }
+
                 Intent.ClickDelete -> {
                     scope.launch {
                         try {
-                            dispatch(Msg.ChangeLoading(true))
-                            state().editableCategoryId?.let {
+                            dispatch(Msg.ChangeButtonLoading(true))
+                            editableCategoryId?.let {
                                 categoriesRepository.deleteCategory(it)
                             }
                             publish(Label.WorkFinished)
                         } catch (e: Exception) {
                             publish(Label.ErrorMsg(e.message ?: "Unknown error"))
                         } finally {
-                            dispatch(Msg.ChangeLoading(false))
+                            dispatch(Msg.ChangeButtonLoading(false))
                         }
                     }
                 }
@@ -189,15 +261,20 @@ internal class ManageCategoriesStoreFactory @Inject constructor(
 
     private object ReducerImpl : Reducer<State, Msg> {
         override fun State.reduce(msg: Msg): State = when (msg) {
-            is Msg.ChangeCategoryName -> copy(categoryName = msg.name)
-            is Msg.ChangeCategoryType  -> copy(categoryType = msg.categoryType)
-            is Msg.ChangeLoading -> copy(isLoading = msg.isLoading)
-            is Msg.ChangeSelectedIcon -> copy(selectedIconEntity = msg.icon)
-            is Msg.EditableCategoryLoaded -> copy(
+            is Msg.ChangeCategoryName -> if (this is State.Content) copy(categoryName = msg.name) else this
+            is Msg.ChangeCategoryType -> if (this is State.Content) copy(categoryType = msg.categoryType) else this
+            is Msg.ChangeButtonLoading -> if (this is State.Content) copy(buttonLoading = msg.isLoading) else this
+            is Msg.ChangeSelectedIcon -> if (this is State.Content) copy(selectedIconEntity = msg.icon) else this
+            is Msg.EditableCategoryLoaded -> State.Content(
                 categoryName = msg.category.name,
                 selectedIconEntity = msg.category.icon,
-                categoryType = msg.category.type
+                categoryType = msg.category.type,
+                buttonLoading = false,
+                openReason = EDIT
             )
+
+            Msg.Error -> State.Error
+            Msg.StartLoading -> State.Loading
         }
     }
 }

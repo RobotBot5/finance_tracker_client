@@ -36,6 +36,10 @@ interface AccountsStore : Store<Intent, State, Label> {
         val totalBalanceState: TotalBalanceState
     ) {
 
+        val isLoading: Boolean
+            get() = accountsState is AccountsState.Loading
+                    || totalBalanceState is TotalBalanceState.Loading
+
         sealed interface AccountsState {
 
             data object Initial : AccountsState
@@ -119,8 +123,6 @@ internal class AccountsStoreFactory @Inject constructor(
                 try {
                     val accounts = accountsRepository.getAccounts()
                     dispatch(Action.AccountsContent(accounts))
-                } catch (e: AuthException) {
-                    dispatch(Action.AuthFailed)
                 }
                 catch (e: Exception) {
                     dispatch(Action.AccountsError)
@@ -131,8 +133,6 @@ internal class AccountsStoreFactory @Inject constructor(
                 try {
                     val totalBalance = accountsRepository.getTotalBalance()
                     dispatch(Action.TotalBalanceStateChanged(TotalBalanceState.Content(totalBalance)))
-                } catch (e: AuthException) {
-                    dispatch(Action.AuthFailed)
                 } catch (e: Exception) {
                     dispatch(Action.TotalBalanceStateChanged(TotalBalanceState.Error))
                 }

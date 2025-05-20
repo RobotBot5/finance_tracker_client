@@ -11,7 +11,7 @@ interface CurrenciesComponent {
 
     fun interface Factory {
         operator fun invoke(
-            selectedCurrencyCode: String,
+            selectedCurrencyCode: String?,
             onCurrencySelected: (String) -> Unit,
             componentContext: ComponentContext
         ): CurrenciesComponent

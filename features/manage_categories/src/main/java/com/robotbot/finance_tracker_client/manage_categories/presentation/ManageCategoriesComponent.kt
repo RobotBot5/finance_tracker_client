@@ -23,16 +23,18 @@ interface ManageCategoriesComponent {
 
     fun onDeleteClicked()
 
+    fun onReloadClicked()
+
     sealed interface Events {
 
-        data class CreateCategoryError(val msg: String) : Events
+        data class ErrorToast(val msg: String) : Events
     }
 
     fun interface Factory {
         operator fun invoke(
             editableCategoryEntityId: Long?,
             onWorkFinished: () -> Unit,
-            onChangeIcon: (Long) -> Unit,
+            onChangeIcon: (Long?) -> Unit,
             componentContext: ComponentContext
         ): ManageCategoriesComponent
     }

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -22,6 +23,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.robotbot.finance_tracker_client.authorize.presentation.AuthorizeComponent
 import com.robotbot.finance_tracker_client.authorize.presentation.AuthorizeStore
@@ -52,6 +55,9 @@ fun AuthorizeContent(component: AuthorizeComponent, modifier: Modifier = Modifie
             TextField(
                 modifier = Modifier
                     .fillMaxWidth(),
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    keyboardType = KeyboardType.Email
+                ),
                 value = state.email,
                 onValueChange = { component.onChangeEmail(it) },
                 label = {
@@ -62,6 +68,10 @@ fun AuthorizeContent(component: AuthorizeComponent, modifier: Modifier = Modifie
             TextField(
                 modifier = Modifier
                     .fillMaxWidth(),
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    keyboardType = KeyboardType.Password
+                ),
+                visualTransformation = PasswordVisualTransformation(),
                 value = state.password,
                 onValueChange = { component.onChangePassword(it) },
                 label = {

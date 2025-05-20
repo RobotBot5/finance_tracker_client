@@ -58,6 +58,10 @@ internal class DefaultAccountsComponent @AssistedInject constructor(
         store.accept(Intent.OnCreateTransferClicked)
     }
 
+    override fun onPullToRefresh() {
+        store.accept(Intent.ReloadAccounts)
+    }
+
     @AssistedFactory
     interface Factory : AccountsComponent.Factory {
         override fun invoke(

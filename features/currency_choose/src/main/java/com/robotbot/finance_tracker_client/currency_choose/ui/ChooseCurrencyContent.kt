@@ -50,7 +50,7 @@ fun ChooseCurrencyContent(component: CurrenciesComponent, modifier: Modifier = M
 @Composable
 private fun CurrenciesList(
     currencies: List<CurrencyEntity>,
-    selectedCurrencyCode: String,
+    selectedCurrencyCode: String?,
     onSelectCurrency: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {

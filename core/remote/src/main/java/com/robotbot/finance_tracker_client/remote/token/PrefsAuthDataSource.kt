@@ -1,6 +1,7 @@
 package com.robotbot.finance_tracker_client.remote.token
 
 import android.app.Application
+import androidx.core.content.edit
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import javax.inject.Inject
@@ -32,7 +33,7 @@ internal class RealPrefsAuthDataSource @Inject constructor(
     }
 
     override fun saveToken(jwtToken: JwtToken) {
-        sharedPreferences.edit().putString(KEY_JWT_TOKEN, jwtToken.token).apply()
+        sharedPreferences.edit { putString(KEY_JWT_TOKEN, jwtToken.token) }
     }
 
     override fun readToken(): JwtToken {
@@ -42,6 +43,6 @@ internal class RealPrefsAuthDataSource @Inject constructor(
     }
 
     override fun clearToken() {
-        sharedPreferences.edit().remove(KEY_JWT_TOKEN).apply()
+        sharedPreferences.edit { remove(KEY_JWT_TOKEN) }
     }
 }

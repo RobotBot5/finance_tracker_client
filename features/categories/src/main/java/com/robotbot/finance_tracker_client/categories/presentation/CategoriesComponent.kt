@@ -10,7 +10,7 @@ interface CategoriesComponent {
 
     fun onCreateCategoryClicked()
 
-    fun onCategoryClicked(accountId: Long)
+    fun onCategoryClicked(categoryId: Long)
 
     fun interface Factory {
         operator fun invoke(

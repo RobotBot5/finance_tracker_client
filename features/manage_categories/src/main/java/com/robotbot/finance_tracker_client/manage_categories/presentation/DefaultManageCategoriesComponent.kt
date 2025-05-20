@@ -22,7 +22,7 @@ internal class DefaultManageCategoriesComponent @AssistedInject constructor(
     private val storeFactory: ManageCategoriesStoreFactory,
     @Assisted("editableCategoryEntityId") private val editableCategoryEntityId: Long?,
     @Assisted("onWorkFinished") private val onWorkFinished: () -> Unit,
-    @Assisted("onChangeIcon") private val onChangeIcon: (Long) -> Unit,
+    @Assisted("onChangeIcon") private val onChangeIcon: (Long?) -> Unit,
     @Assisted componentContext: ComponentContext
 ) : ManageCategoriesComponent, ComponentContext by componentContext {
 
@@ -34,7 +34,7 @@ internal class DefaultManageCategoriesComponent @AssistedInject constructor(
             store.labels.collect {
                 when (it) {
                     is ManageCategoriesStore.Label.ChooseIcon -> onChangeIcon(it.yetSelectedIconId)
-                    is ManageCategoriesStore.Label.ErrorMsg -> _events.emit(Events.CreateCategoryError(it.errorMsg))
+                    is ManageCategoriesStore.Label.ErrorMsg -> _events.emit(Events.ErrorToast(it.errorMsg))
                     ManageCategoriesStore.Label.WorkFinished -> onWorkFinished()
                 }
             }
@@ -72,12 +72,16 @@ internal class DefaultManageCategoriesComponent @AssistedInject constructor(
         store.accept(Intent.ClickDelete)
     }
 
+    override fun onReloadClicked() {
+        store.accept(Intent.Reload)
+    }
+
     @AssistedFactory
     interface Factory : ManageCategoriesComponent.Factory {
         override fun invoke(
             @Assisted("editableCategoryEntityId") editableCategoryEntityId: Long?,
             @Assisted("onWorkFinished") onWorkFinished: () -> Unit,
-            @Assisted("onChangeIcon") onChangeIcon: (Long) -> Unit,
+            @Assisted("onChangeIcon") onChangeIcon: (Long?) -> Unit,
             @Assisted componentContext: ComponentContext
         ): DefaultManageCategoriesComponent
     }

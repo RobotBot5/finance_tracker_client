@@ -65,5 +65,9 @@ dependencies {
     implementation(project(":features:create_transfer"))
     implementation(project(":features:transactions"))
     implementation(project(":features:analytics"))
+    implementation(project(":features:profile"))
     implementation(project(":core:ui"))
+    implementation(project(":core:remote"))
+    implementation(project(":core:dependencies"))
+    implementation(libs.androidx.material.icons.extended)
 }

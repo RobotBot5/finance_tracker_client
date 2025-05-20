@@ -6,7 +6,6 @@ import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineBootstrapper
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
 import com.robotbot.finance_tracker_client.analytics.AnalyticsRepository
-import com.robotbot.finance_tracker_client.analytics.entities.AnalyticByCategoriesEntity
 import com.robotbot.finance_tracker_client.analytics.entities.AnalyticsByCategoriesEntity
 import com.robotbot.finance_tracker_client.analytics.presentation.AnalyticsStore.Intent
 import com.robotbot.finance_tracker_client.analytics.presentation.AnalyticsStore.Label
@@ -38,14 +37,18 @@ internal class AnalyticsStoreFactory @Inject constructor(
     private val analyticsRepository: AnalyticsRepository
 ) {
 
-    fun create(): AnalyticsStore =
-        object : AnalyticsStore, Store<Intent, State, Label> by storeFactory.create(
+    private lateinit var analyticsType: CategoryType
+
+    fun create(analyticsType: CategoryType): AnalyticsStore {
+        this.analyticsType = analyticsType
+        return object : AnalyticsStore, Store<Intent, State, Label> by storeFactory.create(
             name = "AnalyticsStore",
             initialState = State(analyticsState = Loading),
             bootstrapper = BootstrapperImpl(),
             executorFactory = ::ExecutorImpl,
             reducer = ReducerImpl
         ) {}
+    }
 
     private sealed interface Action {
 
@@ -61,9 +64,8 @@ internal class AnalyticsStoreFactory @Inject constructor(
         override fun invoke() {
             scope.launch {
                 dispatch(Action.AnalyticsStateChanged(Loading))
-                    val analytics = analyticsRepository.getAnalyticsByCategories(CategoryType.EXPENSE)
-                    dispatch(Action.AnalyticsStateChanged(AnalyticsState.Content(analytics)))
-
+                val analytics = analyticsRepository.getAnalyticsByCategories(analyticsType)
+                dispatch(Action.AnalyticsStateChanged(AnalyticsState.Content(analytics)))
             }
         }
     }

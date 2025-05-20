@@ -11,7 +11,7 @@ interface ChooseIconComponent {
 
     fun interface Factory {
         operator fun invoke(
-            yetSelectedIconId: Long,
+            yetSelectedIconId: Long?,
             onIconSelected: (Long) -> Unit,
             componentContext: ComponentContext
         ): ChooseIconComponent

@@ -72,6 +72,7 @@ dependencies {
     implementation(project(":data:categories"))
     implementation(project(":data:transactions"))
     implementation(project(":data:analytics"))
+    implementation(project(":data:profile"))
 
     implementation(project(":features:authorize"))
     implementation(project(":features:root"))
@@ -84,7 +85,9 @@ dependencies {
     implementation(project(":features:create_transfer"))
     implementation(project(":features:transactions"))
     implementation(project(":features:analytics"))
+    implementation(project(":features:profile"))
 
+    implementation(libs.androidx.material.icons.extended)
     implementation(project(":core:dependencies"))
     implementation(project(":core:remote"))
     implementation(project(":core:ui"))

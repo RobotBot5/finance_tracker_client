@@ -21,8 +21,8 @@ internal class DefaultManageAccountsComponent @AssistedInject constructor(
     private val storeFactory: ManageAccountsStoreFactory,
     @Assisted("editableAccountEntityId") private val editableAccountEntityId: Long?,
     @Assisted("onWorkFinished") private val onWorkFinished: () -> Unit,
-    @Assisted("onChangeCurrency") private val onChangeCurrency: (String) -> Unit,
-    @Assisted("onChangeIcon") private val onChangeIcon: (Long) -> Unit,
+    @Assisted("onChangeCurrency") private val onChangeCurrency: (String?) -> Unit,
+    @Assisted("onChangeIcon") private val onChangeIcon: (Long?) -> Unit,
     @Assisted componentContext: ComponentContext
 ) : ManageAccountsComponent, ComponentContext by componentContext {
 
@@ -89,8 +89,8 @@ internal class DefaultManageAccountsComponent @AssistedInject constructor(
         override fun invoke(
             @Assisted("editableAccountEntityId") editableAccountEntityId: Long?,
             @Assisted("onWorkFinished") onWorkFinished: () -> Unit,
-            @Assisted("onChangeCurrency") onChangeCurrency: (String) -> Unit,
-            @Assisted("onChangeIcon") onChangeIcon: (Long) -> Unit,
+            @Assisted("onChangeCurrency") onChangeCurrency: (String?) -> Unit,
+            @Assisted("onChangeIcon") onChangeIcon: (Long?) -> Unit,
             componentContext: ComponentContext
         ): DefaultManageAccountsComponent
     }

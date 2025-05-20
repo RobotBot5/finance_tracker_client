@@ -5,11 +5,11 @@ import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineBootstrapper
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
-import com.robotbot.finance_tracker_client.get_info.GetInfoRepository
-import com.robotbot.finance_tracker_client.get_info.entities.CurrencyEntity
 import com.robotbot.finance_tracker_client.currency_choose.presentation.CurrenciesStore.Intent
 import com.robotbot.finance_tracker_client.currency_choose.presentation.CurrenciesStore.Label
 import com.robotbot.finance_tracker_client.currency_choose.presentation.CurrenciesStore.State
+import com.robotbot.finance_tracker_client.get_info.GetInfoRepository
+import com.robotbot.finance_tracker_client.get_info.entities.CurrencyEntity
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -23,7 +23,7 @@ interface CurrenciesStore : Store<Intent, State, Label> {
     data class State(
         val isLoading: Boolean,
         val currenciesList: List<CurrencyEntity>,
-        val selectedCurrencyCode: String
+        val selectedCurrencyCode: String?
     )
 
     sealed interface Label {
@@ -37,7 +37,7 @@ internal class CurrenciesStoreFactory @Inject constructor(
     private val getInfoRepository: GetInfoRepository
 ) {
 
-    fun create(selectedCurrencyCode: String): CurrenciesStore =
+    fun create(selectedCurrencyCode: String?): CurrenciesStore =
         object : CurrenciesStore, Store<Intent, State, Label> by storeFactory.create(
             name = "CurrenciesStore",
             initialState = State(

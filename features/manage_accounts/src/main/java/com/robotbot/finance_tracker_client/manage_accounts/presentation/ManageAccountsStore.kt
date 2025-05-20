@@ -18,7 +18,6 @@ import com.robotbot.finance_tracker_client.manage_accounts.presentation.ManageAc
 import com.robotbot.finance_tracker_client.manage_accounts.presentation.OpenReason.CREATE
 import com.robotbot.finance_tracker_client.manage_accounts.presentation.OpenReason.EDIT
 import kotlinx.coroutines.launch
-import java.math.BigDecimal
 import javax.inject.Inject
 
 interface ManageAccountsStore : Store<Intent, State, Label> {
@@ -44,9 +43,9 @@ interface ManageAccountsStore : Store<Intent, State, Label> {
 
     data class State(
         val accountTitle: String,
-        val balance: BigDecimal,
-        val selectedCurrency: CurrencyEntity,
-        val selectedIconEntity: IconEntity,
+        val balance: String,
+        val selectedCurrency: CurrencyEntity?,
+        val selectedIconEntity: IconEntity?,
         val openReason: OpenReason,
         val editableAccountId: Long?,
         val isLoading: Boolean
@@ -58,9 +57,9 @@ interface ManageAccountsStore : Store<Intent, State, Label> {
 
         data class ErrorMsg(val errorMsg: String) : Label
 
-        data class ChooseCurrency(val selectedCurrencyCode: String) : Label
+        data class ChooseCurrency(val selectedCurrencyCode: String?) : Label
 
-        data class ChooseIcon(val yetSelectedIconId: Long) : Label
+        data class ChooseIcon(val yetSelectedIconId: Long?) : Label
     }
 }
 
@@ -75,9 +74,9 @@ internal class ManageAccountsStoreFactory @Inject constructor(
             name = "ManageAccountsStore",
             initialState = State(
                 accountTitle = "",
-                balance = BigDecimal.ZERO,
-                selectedCurrency = CurrencyEntity(code = "USD", symbol = "$", name = "dollars"),
-                selectedIconEntity = IconEntity(id = 1, name = "dasd", path = "/icons/account_card_24dp.svg"),
+                balance = "",
+                selectedCurrency = null,
+                selectedIconEntity = null,
                 openReason = if (editableAccountId == null) CREATE else EDIT,
                 editableAccountId = editableAccountId,
                 isLoading = false
@@ -136,12 +135,30 @@ internal class ManageAccountsStoreFactory @Inject constructor(
                 }
                 Intent.ClickSave -> {
                     val currentState = state()
+                    val balance = currentState.balance.toBigDecimalOrNull() ?: run {
+                        publish(Label.ErrorMsg("Balance is not valid"))
+                        return
+                    }
+                    val title = currentState.accountTitle.also {
+                        if (it.isBlank()) {
+                            publish(Label.ErrorMsg("Title is not valid"))
+                            return
+                        }
+                    }
+                    val currencyCode = currentState.selectedCurrency?.code ?: run {
+                        publish(Label.ErrorMsg("Currency is not valid"))
+                        return
+                    }
+                    val iconId = currentState.selectedIconEntity?.id ?: run {
+                        publish(Label.ErrorMsg("Icon is not valid"))
+                        return
+                    }
                     if (currentState.openReason == CREATE) {
                         val accountCreateRequest = AccountCreateRequest(
-                            name = currentState.accountTitle,
-                            currencyCode = currentState.selectedCurrency.code,
-                            iconId = currentState.selectedIconEntity.id,
-                            balance = currentState.balance
+                            name = title,
+                            currencyCode = currencyCode,
+                            iconId = iconId,
+                            balance = balance
                         )
                         scope.launch {
                             try {
@@ -156,10 +173,10 @@ internal class ManageAccountsStoreFactory @Inject constructor(
                         }
                     } else if (currentState.openReason == EDIT) {
                         val accountUpdateRequest = AccountUpdateRequest(
-                            name = currentState.accountTitle,
-                            currencyCode = currentState.selectedCurrency.code,
-                            iconId = currentState.selectedIconEntity.id,
-                            balance = currentState.balance
+                            name = title,
+                            currencyCode = currencyCode,
+                            iconId = iconId,
+                            balance = balance
                         )
                         scope.launch {
                             try {
@@ -182,14 +199,14 @@ internal class ManageAccountsStoreFactory @Inject constructor(
                         dispatch(Msg.ChangeSelectedCurrency(currencyEntity))
                     }
                 }
-                Intent.ChooseCurrencyClicked -> publish(Label.ChooseCurrency(state().selectedCurrency.code))
+                Intent.ChooseCurrencyClicked -> publish(Label.ChooseCurrency(state().selectedCurrency?.code))
                 is Intent.ChangeSelectedIcon -> {
                     scope.launch {
                         val iconEntity = getInfoRepository.getIconById(intent.iconId)
                         dispatch(Msg.ChangeSelectedIcon(iconEntity))
                     }
                 }
-                Intent.IconClicked -> publish(Label.ChooseIcon(state().selectedIconEntity.id))
+                Intent.IconClicked -> publish(Label.ChooseIcon(state().selectedIconEntity?.id))
                 Intent.ClickDelete -> {
                     scope.launch {
                         try {
@@ -212,13 +229,13 @@ internal class ManageAccountsStoreFactory @Inject constructor(
     private object ReducerImpl : Reducer<State, Msg> {
         override fun State.reduce(msg: Msg): State = when (msg) {
             is Msg.ChangeAccountTitle -> copy(accountTitle = msg.title)
-            is Msg.ChangeBalance -> copy(balance = msg.balanceString.toBigDecimal())
+            is Msg.ChangeBalance -> copy(balance = msg.balanceString)
             is Msg.ChangeLoading -> copy(isLoading = msg.isLoading)
             is Msg.ChangeSelectedCurrency -> copy(selectedCurrency = msg.currency)
             is Msg.ChangeSelectedIcon -> copy(selectedIconEntity = msg.icon)
             is Msg.EditableAccountLoaded -> copy(
                 accountTitle = msg.account.name,
-                balance = msg.account.balance,
+                balance = msg.account.balance.toPlainString(),
                 selectedCurrency = msg.account.currency,
                 selectedIconEntity = msg.account.icon
             )

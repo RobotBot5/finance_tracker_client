@@ -3,8 +3,8 @@ package com.robotbot.finance_tracker_client.remote
 import android.annotation.SuppressLint
 import com.google.gson.GsonBuilder
 import com.robotbot.finance_tracker_client.remote.token.AuthInterceptor
-import com.robotbot.finance_tracker_client.remote.util.BASE_URL
 import com.robotbot.finance_tracker_client.remote.util.LocalDateTypeAdapter
+import com.robotbot.finance_tracker_client.remote.util.PROD_BASE_URL
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -28,7 +28,7 @@ internal class ApiFactory @Inject constructor(
         }).build()
 
     val retrofit: Retrofit = Retrofit.Builder()
-        .baseUrl(BASE_URL)
+        .baseUrl(PROD_BASE_URL)
         .addConverterFactory(GsonConverterFactory.create(gson))
         .client(okHttpClient)
         .build()

@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 
 internal class DefaultChooseIconComponent @AssistedInject constructor(
     private val storeFactory: ChooseIconsStoreFactory,
-    @Assisted("yetSelectedIconId") private val yetSelectedIconId: Long,
+    @Assisted("yetSelectedIconId") private val yetSelectedIconId: Long?,
     @Assisted("onIconSelected") private val onIconSelected: (Long) -> Unit,
     @Assisted componentContext: ComponentContext
 ) : ChooseIconComponent, ComponentContext by componentContext {
@@ -45,7 +45,7 @@ internal class DefaultChooseIconComponent @AssistedInject constructor(
     @AssistedFactory
     interface Factory : ChooseIconComponent.Factory {
         override fun invoke(
-            @Assisted("yetSelectedIconId") yetSelectedIconId: Long,
+            @Assisted("yetSelectedIconId") yetSelectedIconId: Long?,
             @Assisted("onIconSelected") onIconSelected: (Long) -> Unit,
             @Assisted componentContext: ComponentContext
         ): DefaultChooseIconComponent

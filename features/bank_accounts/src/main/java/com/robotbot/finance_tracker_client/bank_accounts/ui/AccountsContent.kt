@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,12 +22,16 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -48,6 +53,7 @@ import com.robotbot.finance_tracker_client.get_info.entities.CurrencyEntity
 import com.robotbot.finance_tracker_client.get_info.entities.IconEntity
 import com.robotbot.finance_tracker_client.remote.util.BASE_URL
 import com.robotbot.finance_tracker_client.ui.coil.LocalCoilImageLoader
+import com.robotbot.finance_tracker_client.ui.common.ErrorStateWithReloadState
 import com.robotbot.finance_tracker_client.ui.theme.FinanceTrackerTheme
 import java.math.BigDecimal
 
@@ -58,40 +64,51 @@ fun AccountsContent(component: AccountsComponent, modifier: Modifier = Modifier)
 
     when (val accountsState = state.accountsState) {
         State.AccountsState.Initial -> {
-
         }
 
         is State.AccountsState.Content -> {
             AccountsList(
                 accounts = accountsState.accounts,
+                isLoading = state.isLoading,
                 totalBalanceState = state.totalBalanceState,
                 onAccountClicked = component::onAccountClicked,
                 onCreateTransferClicked = component::onCreateTransferClicked,
                 onCreateAccountClicked = component::onCreateAccountClicked,
+                onPullToRefresh = component::onPullToRefresh,
                 modifier = modifier
             )
         }
 
         State.AccountsState.Error -> {
-            Text(text = "Error")
+            ErrorStateWithReloadState(onReloadClicked = component::onPullToRefresh)
         }
 
         State.AccountsState.Loading -> {
-            Text(text = "Loading")
+            Box(
+                modifier = modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 private fun AccountsList(
     accounts: List<AccountEntity>,
+    isLoading: Boolean,
     totalBalanceState: State.TotalBalanceState,
     onAccountClicked: (Long) -> Unit,
     onCreateTransferClicked: () -> Unit,
     onCreateAccountClicked: () -> Unit,
+    onPullToRefresh: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val refreshState = rememberPullToRefreshState()
+
     Scaffold(
         modifier = modifier,
         floatingActionButton = {
@@ -102,54 +119,61 @@ private fun AccountsList(
             }
         }
     ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+        PullToRefreshBox(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .fillMaxSize(),
+            contentAlignment = Alignment.TopCenter,
+            isRefreshing = isLoading,
+            state = refreshState,
+            onRefresh = onPullToRefresh
         ) {
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                ),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                ) {
-                    Text(
-                        text = "Total Balance",
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                    val text = when (totalBalanceState) {
-                        State.TotalBalanceState.Initial -> ""
-                        State.TotalBalanceState.Loading -> "Loading"
-                        State.TotalBalanceState.Error -> "Error"
-                        is State.TotalBalanceState.Content -> {
-                            "${totalBalanceState.totalBalance.totalBalance.toPlainString()}${totalBalanceState.totalBalance.targetCurrency.symbol}"
-                        }
-                    }
-                    Text(
-                        text = text,
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+            LazyColumn {
+                item {
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        ),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
                     ) {
-                        Button(
-                            onClick = onCreateTransferClicked,
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp)
                         ) {
-                            Text(text = "Transfer")
+                            Text(
+                                text = "Total Balance",
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                            val text = when (totalBalanceState) {
+                                State.TotalBalanceState.Initial -> ""
+                                State.TotalBalanceState.Loading -> "Loading"
+                                State.TotalBalanceState.Error -> "Error"
+                                is State.TotalBalanceState.Content -> {
+                                    "${totalBalanceState.totalBalance.totalBalance.toPlainString()}${totalBalanceState.totalBalance.targetCurrency.symbol}"
+                                }
+                            }
+                            Text(
+                                text = text,
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Button(
+                                    onClick = onCreateTransferClicked,
+                                ) {
+                                    Text(text = "Transfer")
+                                }
+                                Button(
+                                    onClick = {}
+                                ) { Text(text = "Transfer History") }
+                            }
                         }
-                        Button(
-                            onClick = {}
-                        ) { Text(text = "Transfer History") }
                     }
                 }
-            }
-            LazyColumn {
                 items(
                     items = accounts,
                     key = { it.id }
@@ -247,7 +271,9 @@ private fun AccountsListPreviewLight() {
                 ),
                 onAccountClicked = {},
                 onCreateTransferClicked = {},
-                onCreateAccountClicked = {}
+                onCreateAccountClicked = {},
+                onPullToRefresh = {},
+                isLoading = false
             )
         }
     }
@@ -286,7 +312,9 @@ private fun AccountsListPreviewDark() {
                 ),
                 onAccountClicked = {},
                 onCreateTransferClicked = {},
-                onCreateAccountClicked = {}
+                onCreateAccountClicked = {},
+                onPullToRefresh = {},
+                isLoading = false
             )
         }
     }

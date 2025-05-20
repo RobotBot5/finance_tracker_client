@@ -45,4 +45,9 @@ dependencies {
     implementation(project(":data:get_info"))
     implementation(project(":core:remote"))
     implementation(project(":core:common"))
+
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(kotlin("test"))
 }

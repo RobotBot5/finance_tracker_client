@@ -16,8 +16,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -76,6 +80,7 @@ fun TransactionsContent(component: TransactionsComponent, modifier: Modifier = M
     }
 }
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 private fun TransactionsList(
     groupedTransactions: List<GroupedByDateTransactions>,
@@ -83,33 +88,37 @@ private fun TransactionsList(
     onCreateTransactionClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    LazyColumn(modifier = modifier) {
-        groupedTransactions.forEach { group ->
-            item {
-                Text(
-                    text = group.dateLabel,
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-                        .padding(8.dp)
-                )
-            }
-            items(
-                items = group.transactions,
-                key = { it.id }
-            ) { transaction ->
-                TransactionItem(
-                    transaction = transaction,
-                    onTransactionClicked = onTransactionClicked
-                )
-            }
-        }
-        item {
-            Button(
+    Scaffold(
+        modifier = modifier,
+        floatingActionButton = {
+            FloatingActionButton(
                 onClick = onCreateTransactionClicked
             ) {
-                Text(text = "Create Transaction")
+                Icon(imageVector = Icons.Default.Add, contentDescription = null)
+            }
+        }
+    ) {
+        LazyColumn {
+            groupedTransactions.forEach { group ->
+                item {
+                    Text(
+                        text = group.dateLabel,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                            .padding(8.dp)
+                    )
+                }
+                items(
+                    items = group.transactions,
+                    key = { it.id }
+                ) { transaction ->
+                    TransactionItem(
+                        transaction = transaction,
+                        onTransactionClicked = onTransactionClicked
+                    )
+                }
             }
         }
     }

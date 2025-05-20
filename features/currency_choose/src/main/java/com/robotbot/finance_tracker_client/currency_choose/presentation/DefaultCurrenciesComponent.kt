@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 
 internal class DefaultCurrenciesComponent @AssistedInject constructor(
     private val storeFactory: CurrenciesStoreFactory,
-    @Assisted("selectedCurrencyCode") private val selectedCurrencyCode: String,
+    @Assisted("selectedCurrencyCode") private val selectedCurrencyCode: String?,
     @Assisted("onCurrencySelected") private val onCurrencySelected: (String) -> Unit,
     @Assisted componentContext: ComponentContext
 ) : CurrenciesComponent, ComponentContext by componentContext {
@@ -45,7 +45,7 @@ internal class DefaultCurrenciesComponent @AssistedInject constructor(
     @AssistedFactory
     interface Factory : CurrenciesComponent.Factory {
         override fun invoke(
-            @Assisted("selectedCurrencyCode") selectedCurrencyCode: String,
+            @Assisted("selectedCurrencyCode") selectedCurrencyCode: String?,
             @Assisted("onCurrencySelected") onCurrencySelected: (String) -> Unit,
             componentContext: ComponentContext
         ): DefaultCurrenciesComponent

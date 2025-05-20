@@ -71,4 +71,7 @@ dependencies {
     implementation(project(":core:remote"))
 
     implementation(libs.coil.compose)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.androidx.junit)
 }

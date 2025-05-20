@@ -23,7 +23,7 @@ interface ChooseIconStore : Store<Intent, State, Label> {
     data class State(
         val isLoading: Boolean,
         val iconsList: List<IconEntity>,
-        val yetSelectedIconId: Long
+        val yetSelectedIconId: Long?
     )
 
     sealed interface Label {
@@ -37,7 +37,7 @@ internal class ChooseIconsStoreFactory @Inject constructor(
     private val getInfoRepository: GetInfoRepository
 ) {
 
-    fun create(yetSelectedIconId: Long): ChooseIconStore =
+    fun create(yetSelectedIconId: Long?): ChooseIconStore =
         object : ChooseIconStore, Store<Intent, State, Label> by storeFactory.create(
             name = "ChooseIconsStore",
             initialState = State(

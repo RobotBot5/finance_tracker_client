@@ -4,6 +4,7 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.arkivanov.mvikotlin.extensions.coroutines.stateFlow
+import com.robotbot.finance_tracker_client.categories.entities.CategoryType
 import com.robotbot.finance_tracker_client.dependencies.util.componentScope
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -12,12 +13,13 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-internal class DefaultAnalyticsComponentImpl @AssistedInject constructor(
+internal class DefaultAnalyticsComponent @AssistedInject constructor(
     private val storeFactory: AnalyticsStoreFactory,
+    @Assisted private val analyticsType: CategoryType,
     @Assisted componentContext: ComponentContext,
 ) : AnalyticsComponent, ComponentContext by componentContext {
 
-    private val store = instanceKeeper.getStore { storeFactory.create() }
+    private val store = instanceKeeper.getStore { storeFactory.create(analyticsType) }
     private val scope = componentScope()
 
     init {
@@ -34,7 +36,8 @@ internal class DefaultAnalyticsComponentImpl @AssistedInject constructor(
     @AssistedFactory
     interface Factory : AnalyticsComponent.Factory {
         override fun invoke(
+            @Assisted analyticsType: CategoryType,
             @Assisted componentContext: ComponentContext
-        ): DefaultAnalyticsComponentImpl
+        ): DefaultAnalyticsComponent
     }
 }

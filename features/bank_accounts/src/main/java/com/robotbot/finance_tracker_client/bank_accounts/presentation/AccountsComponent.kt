@@ -13,6 +13,8 @@ interface AccountsComponent {
 
     fun onCreateTransferClicked()
 
+    fun onPullToRefresh()
+
     fun interface Factory {
         operator fun invoke(
             onAuthFailed: () -> Unit,

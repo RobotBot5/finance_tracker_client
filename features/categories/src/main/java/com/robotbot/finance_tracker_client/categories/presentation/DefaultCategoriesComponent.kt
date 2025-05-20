@@ -47,8 +47,8 @@ internal class DefaultCategoriesComponent @AssistedInject constructor(
         store.accept(Intent.OnCreateCategoryClicked)
     }
 
-    override fun onCategoryClicked(accountId: Long) {
-        store.accept(Intent.OnCategoryClicked(accountId))
+    override fun onCategoryClicked(categoryId: Long) {
+        store.accept(Intent.OnCategoryClicked(categoryId))
     }
 
     @AssistedFactory

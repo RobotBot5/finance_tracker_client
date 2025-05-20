@@ -63,8 +63,8 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    implementation(project(":data:analytics"))
-    implementation(project(":data:categories"))
+    implementation(project(":data:profile"))
+    implementation(project(":data:authorize"))
     implementation(project(":data:get_info"))
     implementation(project(":core:dependencies"))
     implementation(project(":core:common"))

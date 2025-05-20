@@ -60,7 +60,7 @@ fun ChooseIconContent(component: ChooseIconComponent, modifier: Modifier = Modif
 @Composable
 private fun IconsList(
     icons: List<IconEntity>,
-    selectedIconId: Long,
+    selectedIconId: Long?,
     onIconClicked: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -87,9 +87,11 @@ private fun IconsList(
                     modifier = Modifier
                         .size(52.dp)
                         .clip(CircleShape)
-                        .background(if (icon.id == selectedIconId)
-                            MaterialTheme.colorScheme.secondary
-                        else MaterialTheme.colorScheme.secondaryContainer)
+                        .background(
+                            if (icon.id == selectedIconId)
+                                MaterialTheme.colorScheme.secondary
+                            else MaterialTheme.colorScheme.secondaryContainer
+                        )
                         .padding(8.dp),
                     model = BASE_URL.dropLast(1) + icon.path,
                     imageLoader = imageLoader,
